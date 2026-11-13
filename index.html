@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="我的聖經">
+<meta name="theme-color" content="#fbfaf7">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>我的聖經</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;600;700&family=Noto+Serif+Hebrew:wght@400;600&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fs:22px; --lh:1.85;
+  --bg:#fbfaf7; --fg:#22201c; --muted:#6f6a61; --line:#e7e2d8; --card:#ffffff; --soft:#f3efe7; --side:#f4f1ea;
+  --accent:#8a5a2b; --accent-soft:#f3e7d8; --danger:#b23b2e; --ok:#3f7d4e;
+  --h-yellow:#fff0a3; --h-green:#d5f0c6; --h-blue:#d2e6ff; --h-pink:#ffd8e6; --h-orange:#ffdfbd;
+  --shadow:0 8px 28px rgba(40,30,15,.14);
+  --vfont:"Noto Serif TC","Songti TC",serif;
+  --ufont:"Noto Sans TC","PingFang TC",system-ui,sans-serif;
+  --gfont:"Noto Serif","Gentium Plus",Georgia,serif;
+  --hfont:"Noto Serif Hebrew","SBL Hebrew","Times New Roman",serif;
+}
+body.sepia{--bg:#f4ecd9;--fg:#3a2e21;--muted:#7a6b57;--line:#e2d6bd;--card:#fbf5e8;--soft:#ece2cb;--side:#efe5cf;--accent:#8a5a2b;--accent-soft:#eadbc0}
+body.dark{--bg:#151517;--fg:#e8e4dc;--muted:#9a958c;--line:#2d2d32;--card:#1f1f23;--soft:#26262b;--side:#1b1b1e;--accent:#d9a86c;--accent-soft:#3a2f22;--danger:#ff7b6b;--ok:#7cc48d;
+  --h-yellow:rgba(255,220,80,.28);--h-green:rgba(120,210,110,.25);--h-blue:rgba(110,165,255,.28);--h-pink:rgba(255,120,170,.26);--h-orange:rgba(255,160,70,.28);
+  --shadow:0 8px 28px rgba(0,0,0,.5)}
+body.sans{--vfont:"Noto Sans TC","PingFang TC",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--ufont);font-size:17px;-webkit-text-size-adjust:100%}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+input,textarea,select{font-family:inherit;font-size:17px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:100%}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+a{color:var(--accent)}
+
+/* ---------- layout ---------- */
+#side{position:fixed;left:0;top:0;bottom:0;width:248px;background:var(--side);border-right:1px solid var(--line);z-index:35;display:flex;flex-direction:column;transition:transform .22s ease;overflow-y:auto}
+#side .brand{padding:22px 20px 16px;display:flex;align-items:center;gap:10px}
+#side .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#a0662f,#d9a86c);display:flex;align-items:center;justify-content:center;color:#fff}
+#side .brand b{font-size:19px;font-family:var(--vfont)}
+#side nav{display:flex;flex-direction:column;padding:4px 10px}
+#side nav button{display:flex;align-items:center;gap:14px;padding:11px 12px;border-radius:10px;font-size:17px;color:var(--fg);text-align:left}
+#side nav button svg{color:var(--muted)}
+#side nav button:hover{background:var(--soft)}
+#side nav button.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+#side nav button.on svg{color:var(--accent)}
+#side nav hr{border:0;border-top:1px solid var(--line);margin:8px 6px}
+#side .foot{margin-top:auto;padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.6}
+#main{margin-left:248px;min-height:100vh;transition:margin .22s ease}
+body.noside #side{transform:translateX(-100%)}
+body.noside #main{margin-left:0}
+#sidescrim{display:none}
+@media (max-width:999px){
+  #main{margin-left:0}
+  #side{transform:translateX(-100%);box-shadow:var(--shadow)}
+  body.sideopen #side{transform:none}
+  body.sideopen #sidescrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:34}
+}
+
+/* ---------- header ---------- */
+#top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:4px;padding:6px 10px;max-width:1300px;margin:0 auto}
+.ib{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;color:var(--fg);flex:none}
+.ib:hover{background:var(--soft)}
+.ib.on{color:var(--accent);background:var(--accent-soft)}
+#where{font-size:20px;font-weight:700;padding:6px 12px;border-radius:10px;display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+#where:hover{background:var(--soft)}
+#where small{font-weight:400;color:var(--muted);font-size:16px}
+#vtitle{font-size:20px;font-weight:700;padding:0 8px}
+.grow{flex:1}
+.chips{display:flex;gap:6px;align-items:center;padding:0 12px 8px;max-width:1300px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:15px;white-space:nowrap;color:var(--muted);background:var(--card)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:500}
+.chips .lbl{font-size:14px;color:var(--muted);white-space:nowrap}
+.chips .vsep{width:1px;height:20px;background:var(--line);margin:0 4px;flex:none}
+#sync{font-size:13px;color:var(--muted);white-space:nowrap;margin-left:auto;padding-left:8px}
+
+/* ---------- reader ---------- */
+#view{max-width:1300px;margin:0 auto;padding:14px 14px 120px}
+.chead{display:flex;align-items:baseline;gap:12px;padding:8px 10px 14px;flex-wrap:wrap}
+.chead h1{font-family:var(--vfont);font-size:calc(var(--fs) * 1.35);margin:0;font-weight:600}
+.chead span{color:var(--muted);font-size:17px;font-family:Georgia,serif}
+.colnames{display:grid;gap:28px;padding:0 12px 6px;color:var(--muted);font-size:14px;letter-spacing:.05em}
+.v{position:relative;border-radius:10px;padding:6px 12px;margin:1px 0;cursor:pointer;transition:background .15s}
+.v .cols{display:grid;gap:28px}
+.v .t{font-family:var(--vfont);font-size:var(--fs);line-height:var(--lh)}
+.v .t.en{font-family:Georgia,"Times New Roman",serif}
+body.sans .v .t.en{font-family:system-ui,-apple-system,sans-serif}
+.v .stack .t+.t{margin-top:2px}
+.v .stack .t.sub{font-size:calc(var(--fs) * .9);color:color-mix(in srgb,var(--fg) 82%,var(--bg))}
+.v sup{font-family:var(--ufont);font-size:.6em;color:var(--accent);font-weight:700;margin-right:5px;vertical-align:.45em}
+.drop{float:left;font-family:var(--vfont);font-size:calc(var(--fs) * 3.1);line-height:.9;color:var(--accent);font-weight:700;margin:4px 12px 0 0}
+.v.sel{box-shadow:inset 0 0 0 2px var(--accent);background:color-mix(in srgb,var(--accent-soft) 60%,transparent)}
+.v.hl-yellow{background:var(--h-yellow)}.v.hl-green{background:var(--h-green)}.v.hl-blue{background:var(--h-blue)}.v.hl-pink{background:var(--h-pink)}.v.hl-orange{background:var(--h-orange)}
+.v.flash{animation:flash 1.6s ease}
+@keyframes flash{0%,40%{box-shadow:inset 0 0 0 3px var(--accent)}100%{box-shadow:none}}
+.marks{position:absolute;right:-4px;top:6px;display:flex;flex-direction:column;gap:2px}
+.mk{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--accent)}
+.mk svg{width:18px;height:18px}
+.mk.nm{background:var(--accent-soft)}
+.v.hasmk{padding-right:36px}
+/* interlinear */
+.il{display:flex;flex-wrap:wrap;gap:4px 6px;margin:8px 0 4px;padding:8px 6px 6px;border-top:1px dashed var(--line)}
+.il.he{direction:rtl}
+.w{display:inline-flex;flex-direction:column;align-items:center;padding:4px 7px;border-radius:8px;cursor:pointer;min-width:34px;text-align:center}
+.w:hover,.w.on{background:var(--accent-soft)}
+.w b{font-weight:400;font-size:calc(var(--fs) * 1.05);line-height:1.3}
+.il.gr .w b{font-family:var(--gfont)}
+.il.he .w b{font-family:var(--hfont);font-size:calc(var(--fs) * 1.2)}
+.w i{font-style:normal;font-size:13px;color:var(--muted);direction:ltr;font-family:var(--gfont)}
+.w small{font-size:13px;color:var(--accent);direction:ltr;max-width:130px;line-height:1.3}
+.cnav{display:flex;justify-content:space-between;gap:12px;padding:28px 10px 0}
+.cnav button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
+.empty{max-width:640px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;line-height:1.75}
+@media (max-width:720px){
+  .v .cols,.colnames{grid-template-columns:1fr !important;gap:4px}
+  .v .cols .t+.t{border-top:1px dashed var(--line);padding-top:4px;margin-top:2px}
+  .colnames{display:none}
+  #view{padding:10px 6px 120px}
+  #where{font-size:18px;padding:6px 8px;max-width:48vw}
+  #where small{display:none}
+  .ib{width:38px;height:40px}
+}
+
+/* ---------- home & pages ---------- */
+.page{max-width:1100px;margin:0 auto}
+.hello{padding:10px 6px 16px}
+.hello h2{margin:0;font-size:28px;font-family:var(--vfont)}
+.hello p{margin:4px 0 0;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+.card h3{margin:0 0 10px;font-size:18px;display:flex;align-items:center;gap:8px}
+.card h3 .more{margin-left:auto;font-size:15px;font-weight:400;color:var(--accent)}
+.dv{position:relative;border-radius:22px;overflow:hidden;color:#fff;padding:66px 28px 24px;min-height:260px;display:flex;flex-direction:column;justify-content:flex-end;
+  background:radial-gradient(120% 90% at 85% 10%,rgba(255,214,150,.75),transparent 55%),radial-gradient(90% 80% at 10% 100%,rgba(60,30,80,.85),transparent 60%),linear-gradient(160deg,#c9774a 0%,#8e4b5e 45%,#3b2a4f 100%)}
+.dv.v2{background:radial-gradient(100% 80% at 80% 0%,rgba(190,230,255,.6),transparent 55%),linear-gradient(170deg,#4f7fa6 0%,#2f5874 50%,#1f3347 100%)}
+.dv.v3{background:radial-gradient(100% 80% at 20% 0%,rgba(255,240,190,.6),transparent 50%),linear-gradient(165deg,#7d9b5c 0%,#4f6d43 50%,#2e3f2a 100%)}
+.dv .tagline{position:absolute;top:18px;left:24px;font-size:14px;letter-spacing:.12em;background:rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;backdrop-filter:blur(4px)}
+.dv .ref{font-size:15px;letter-spacing:.1em;opacity:.92;margin-bottom:8px}
+.dv .txt{font-family:var(--vfont);font-size:clamp(22px,2.6vw,30px);line-height:1.6;text-shadow:0 1px 8px rgba(0,0,0,.25)}
+.dv .en{font-family:Georgia,serif;font-size:17px;line-height:1.55;opacity:.9;margin-top:10px}
+.dv .acts{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.dv .acts button{background:rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:7px 14px;font-size:15px;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(4px)}
+.dv .acts svg{width:18px;height:18px}
+.topics{display:flex;flex-wrap:wrap;gap:8px}
+.topics button{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:8px 16px;font-size:16px}
+.topics button.on{background:var(--accent);color:#fff}
+body.dark .topics button.on{color:#1a1308}
+.prog{height:8px;background:var(--soft);border-radius:99px;overflow:hidden}
+.prog>div{height:100%;background:var(--accent);border-radius:99px}
+.rd{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.rd button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 12px;font-size:16px}
+.rd button.done{background:color-mix(in srgb,var(--ok) 15%,var(--card));border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok)}
+.plan{display:flex;gap:14px;align-items:flex-start}
+.plan .ico{width:52px;height:52px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--vfont);font-size:20px;font-weight:700}
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:10px}
+.day{border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:14px;display:flex;gap:8px;align-items:flex-start;background:var(--card);text-align:left}
+.day.done{background:color-mix(in srgb,var(--ok) 12%,var(--card))}
+.day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.day .ck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--muted);flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center}
+.day.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.day.done .ck svg{width:13px;height:13px;stroke-width:3}
+
+/* ---------- action bar ---------- */
+#act{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translate(-50%,140%);z-index:30;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px;display:flex;align-items:center;gap:4px;padding:6px 8px;transition:transform .2s;max-width:calc(100vw - 16px);overflow-x:auto}
+@media (min-width:1000px){body:not(.noside) #act{left:calc(50% + 124px)}}
+#act.show{transform:translate(-50%,0)}
+#act .cnt{font-size:15px;color:var(--muted);padding:0 8px;white-space:nowrap}
+.dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line);margin:0 3px;flex:none}
+.dot.none{background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.dot.none svg{width:16px;height:16px}
+.sep{width:1px;height:28px;background:var(--line);margin:0 4px;flex:none}
+.ab{display:inline-flex;align-items:center;gap:5px;padding:8px 10px;border-radius:10px;white-space:nowrap;font-size:15px}
+.ab:hover{background:var(--soft)}
+
+/* ---------- drawer ---------- */
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+#scrim.show{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(500px,100vw);background:var(--bg);z-index:41;box-shadow:var(--shadow);transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column}
+#drawer.show{transform:none}
+.dh{display:flex;align-items:center;gap:6px;padding:10px 10px 10px 18px;border-bottom:1px solid var(--line)}
+.dh h3{margin:0;font-size:19px;flex:1;display:flex;align-items:center;gap:6px}
+.db{flex:1;overflow-y:auto;padding:14px 16px 40px;-webkit-overflow-scrolling:touch}
+.sec{margin:6px 0 20px}
+.sec>h4{font-size:15px;color:var(--muted);margin:0 0 8px;font-weight:500;letter-spacing:.04em}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
+.bgrid button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 4px;font-size:16px;line-height:1.25}
+.bgrid button small{display:block;font-size:12.5px;color:var(--muted);font-family:Georgia,serif}
+.bgrid button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:700}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+.cgrid button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:11px 0;font-size:17px}
+.cgrid button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:700}
+.row{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;padding:9px 16px;background:var(--accent);color:#fff;font-weight:500;white-space:nowrap}
+body.dark .btn{color:#1a1308}
+.btn.ghost{background:var(--card);color:var(--fg);border:1px solid var(--line);font-weight:400}
+.btn.danger{background:none;color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 40%,transparent)}
+.btn.sm{padding:6px 11px;font-size:15px}
+.btn svg{width:18px;height:18px}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer}
+.item .ref{font-weight:700;color:var(--accent);font-size:16px}
+.item .tx{font-family:var(--vfont);font-size:17px;line-height:1.7;margin-top:3px}
+.item .tx2{font-family:Georgia,serif;font-size:15px;line-height:1.6;color:var(--muted);margin-top:3px}
+.item .meta{font-size:14px;color:var(--muted);margin-top:4px}
+.item mark{background:var(--h-yellow);color:inherit;border-radius:3px;padding:0 1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg button{padding:8px 14px;font-size:16px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+.hint{font-size:15px;color:var(--muted);line-height:1.65}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font-size:14px}
+.tag button{display:inline-flex;color:inherit}
+.tag svg{width:14px;height:14px}
+input[type=range]{padding:0;border:0;background:none;accent-color:var(--accent)}
+.bib{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.bib .nm{flex:1;min-width:0}
+.bib .nm b{display:block}
+.bib .nm span{font-size:14px;color:var(--muted)}
+.prev{border-left:3px solid var(--accent);background:var(--card);border-radius:0 10px 10px 0;padding:9px 12px;margin:8px 0;cursor:pointer}
+.prev .ref{font-weight:700;color:var(--accent);font-size:15px}
+.prev .tx{font-family:var(--vfont);font-size:17px;line-height:1.7}
+.prev .tx2{font-family:Georgia,serif;font-size:15px;line-height:1.6;color:var(--muted);margin-top:3px}
+.prev sup{font-size:.65em;color:var(--accent);margin-right:3px}
+#nbody{min-height:220px;resize:vertical;line-height:1.75;font-size:18px}
+#ntitle{font-size:19px;font-weight:700}
+.status{font-size:14px;color:var(--muted)}
+/* word study */
+.lexhead{text-align:center;padding:6px 0 14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.lexhead .lm{font-size:40px;line-height:1.3}
+.lexhead .lm.he{font-family:var(--hfont)}
+.lexhead .lm.gr{font-family:var(--gfont)}
+.lexhead .tr{color:var(--muted);font-size:17px;font-family:var(--gfont)}
+.lexhead .gl{font-size:20px;font-weight:700;color:var(--accent);margin-top:6px}
+.kv{display:grid;grid-template-columns:88px 1fr;gap:6px 10px;font-size:16px;line-height:1.6}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+.def{font-family:var(--gfont);font-size:16px;line-height:1.75;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.def b{color:var(--accent)}
+
+/* ---------- modal + toast ---------- */
+#modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.35);padding:16px}
+#modal.show{display:flex}
+.mbox{background:var(--bg);border-radius:16px;box-shadow:var(--shadow);width:min(520px,100%);max-height:86vh;overflow:auto;padding:20px 22px}
+.mbox h3{margin:0 0 10px;font-size:20px}
+.mbox .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:70;background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:16px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
+#toast.show{opacity:.94}
+#verseBtn{font-size:17px;padding:7px 10px;border-radius:10px;display:inline-flex;align-items:center;gap:3px;border:1px solid var(--line);background:var(--card);margin-left:4px;color:var(--fg)}
+.xr{font-family:var(--ufont);font-size:13px;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 8px 1px 6px;margin-left:8px;vertical-align:3px;display:inline-flex;align-items:center;gap:3px;line-height:1.6}
+.xr svg{width:13px;height:13px;stroke-width:2.2}
+.xr:hover{background:var(--accent);color:#fff}
+@media (max-width:600px){#nstatus{display:none}}
+.bshort{display:none}
+@media (max-width:720px){.bfull{display:none}.bshort{display:inline}}
+#verseBtn:hover{background:var(--soft)}
+@media (max-width:720px){#bar [data-panel=marks],#bar [data-panel=settings]{display:none}#chapBtn{font-size:18px;padding:5px 8px}#verseBtn{font-size:15px;padding:6px 7px}}
+#chapBtn{font-size:20px;font-weight:700;padding:6px 10px;border-radius:10px;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--card);margin-left:2px}
+#chapBtn:hover,#where:hover{background:var(--soft)}
+#where .car,#chapBtn .car{font-size:13px;color:var(--muted);font-weight:400}
+.nview{font-size:18px;line-height:1.85;white-space:pre-wrap;word-break:break-word;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-height:120px}
+.nview h2{font-size:21px;margin:0 0 8px;white-space:normal}
+a.vref{color:var(--accent);font-weight:500;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;cursor:pointer;border-radius:4px;padding:0 1px}
+a.vref:hover,a.vref.on{background:var(--accent-soft);text-decoration-style:solid}
+#pop{position:fixed;z-index:80;width:min(440px,92vw);max-height:60vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px 16px 12px;display:none}
+#pop.show{display:block}
+#pop .pref{font-weight:700;color:var(--accent);font-size:16px}
+#pop .pref span{font-weight:400;color:var(--muted);font-family:Georgia,serif;margin-left:6px}
+#pop .ptx{font-family:var(--vfont);font-size:19px;line-height:1.75;margin:6px 0 2px}
+#pop .ptx2{font-family:Georgia,serif;font-size:16px;line-height:1.6;color:var(--muted);margin-bottom:6px}
+#pop sup{font-size:.6em;color:var(--accent);margin-right:3px;font-weight:700}
+#pop .pacts{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;position:sticky;bottom:-12px;background:var(--bg);padding:8px 0 4px}
+@media (max-width:600px){#pop{left:0 !important;right:0;bottom:0;top:auto !important;width:100%;max-height:70vh;border-radius:18px 18px 0 0}}
+label.f{display:block;font-size:15px;color:var(--muted);margin:10px 0 4px}
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="brand"><div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M12 7v6M9.5 9.5h5"/></svg></div><b>我的聖經</b></div>
+  <nav id="nav"></nav>
+  <div class="foot" id="sidefoot"></div>
+</aside>
+<div id="sidescrim"></div>
+<div id="main">
+<header id="top">
+  <div class="bar" id="bar"></div>
+  <div class="chips" id="chips"></div>
+</header>
+<main id="view"></main>
+</div>
+<div id="act"></div>
+<div id="scrim"></div>
+<aside id="drawer"><div class="dh"><h3 id="dtitle"></h3><button class="ib" id="dclose" title="關閉"><svg class="i" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="db" id="dbody"></div></aside>
+<div id="modal"><div class="mbox" id="mbox"></div></div>
+<div id="toast"></div>
+<div id="pop"></div>
+<input type="file" id="fileIn" accept=".json,.txt,application/json,text/plain" style="display:none">
+<script>
+"use strict";
+/* ================= 書卷資料 ================= */
+const BOOK_SRC = `Gen|創世記|創|Genesis|Gen,Gn|50
+Exod|出埃及記|出|Exodus|Exod,Ex,Exo|40
+Lev|利未記|利|Leviticus|Lev,Lv|27
+Num|民數記|民|Numbers|Num,Nm|36
+Deut|申命記|申|Deuteronomy|Deut,Dt,Deu|34
+Josh|約書亞記|書|Joshua|Josh,Jos|24
+Judg|士師記|士|Judges|Judg,Jdg|21
+Ruth|路得記|得|Ruth|Rut|4
+1Sam|撒母耳記上|撒上|1 Samuel|1 Sam,1 Sa,1 Sm|31
+2Sam|撒母耳記下|撒下|2 Samuel|2 Sam,2 Sa,2 Sm|24
+1Kgs|列王紀上|王上|1 Kings|1 Kgs,1 Ki,1 Kin|22
+2Kgs|列王紀下|王下|2 Kings|2 Kgs,2 Ki,2 Kin|25
+1Chr|歷代志上|代上|1 Chronicles|1 Chr,1 Ch,1 Chron|29
+2Chr|歷代志下|代下|2 Chronicles|2 Chr,2 Ch,2 Chron|36
+Ezra|以斯拉記|拉|Ezra|Ezr|10
+Neh|尼希米記|尼|Nehemiah|Neh|13
+Esth|以斯帖記|斯|Esther|Esth,Est|10
+Job|約伯記|伯|Job|Jb|42
+Ps|詩篇|詩|Psalms|Psalm,Ps,Psa,Pss|150
+Prov|箴言|箴|Proverbs|Prov,Pr,Prv|31
+Eccl|傳道書|傳|Ecclesiastes|Eccl,Ecc,Qoh|12
+Song|雅歌|歌|Song of Solomon|Song,Song of Songs,SOS,Cant|8
+Isa|以賽亞書|賽|Isaiah|Isa|66
+Jer|耶利米書|耶|Jeremiah|Jer|52
+Lam|耶利米哀歌|哀|Lamentations|Lam|5
+Ezek|以西結書|結|Ezekiel|Ezek,Eze|48
+Dan|但以理書|但|Daniel|Dan,Dn|12
+Hos|何西阿書|何|Hosea|Hos|14
+Joel|約珥書|珥|Joel|Jl|3
+Amos|阿摩司書|摩|Amos||9
+Obad|俄巴底亞書|俄|Obadiah|Obad,Ob|1
+Jonah|約拿書|拿|Jonah|Jon,Jnh|4
+Mic|彌迦書|彌|Micah|Mic|7
+Nah|那鴻書|鴻|Nahum|Nah|3
+Hab|哈巴谷書|哈|Habakkuk|Hab|3
+Zeph|西番雅書|番|Zephaniah|Zeph,Zep|3
+Hag|哈該書|該|Haggai|Hag|2
+Zech|撒迦利亞書|亞|Zechariah|Zech,Zec|14
+Mal|瑪拉基書|瑪|Malachi|Mal|4
+Matt|馬太福音|太|Matthew|Matt,Mt,Mat|28
+Mark|馬可福音|可|Mark|Mk,Mrk|16
+Luke|路加福音|路|Luke|Lk,Luk|24
+John|約翰福音|約|John|Jn,Jhn|21
+Acts|使徒行傳|徒|Acts|Act|28
+Rom|羅馬書|羅|Romans|Rom,Rm|16
+1Cor|哥林多前書|林前|1 Corinthians|1 Cor,1 Co|16
+2Cor|哥林多後書|林後|2 Corinthians|2 Cor,2 Co|13
+Gal|加拉太書|加|Galatians|Gal|6
+Eph|以弗所書|弗|Ephesians|Eph|6
+Phil|腓立比書|腓|Philippians|Phil,Php|4
+Col|歌羅西書|西|Colossians|Col|4
+1Thess|帖撒羅尼迦前書|帖前|1 Thessalonians|1 Thess,1 Th,1 Thes|5
+2Thess|帖撒羅尼迦後書|帖後|2 Thessalonians|2 Thess,2 Th,2 Thes|3
+1Tim|提摩太前書|提前|1 Timothy|1 Tim,1 Ti|6
+2Tim|提摩太後書|提後|2 Timothy|2 Tim,2 Ti|4
+Titus|提多書|多|Titus|Tit|3
+Phlm|腓利門書|門|Philemon|Philem,Phlm,Phm|1
+Heb|希伯來書|來|Hebrews|Heb|13
+Jas|雅各書|雅|James|Jas,Jm|5
+1Pet|彼得前書|彼前|1 Peter|1 Pet,1 Pe,1 Pt|5
+2Pet|彼得後書|彼後|2 Peter|2 Pet,2 Pe,2 Pt|3
+1John|約翰一書|約壹,約一|1 John|1 Jn,1 Jo|5
+2John|約翰二書|約貳,約二|2 John|2 Jn,2 Jo|1
+3John|約翰三書|約參,約三|3 John|3 Jn,3 Jo|1
+Jude|猶大書|猶|Jude|Jud|1
+Rev|啟示錄|啟,啓示錄,啓|Revelation|Rev,Re,Revelations|22`;
+const BOOKS = BOOK_SRC.split("\n").map((l,i)=>{const [osis,zh,za,en,ea,ch]=l.split("|");return {n:i+1,osis,zh,za:za.split(",")[0],zaAll:za.split(","),en,ea:ea?ea.split(","):[],ch:+ch};});
+const norm = s => String(s).toLowerCase().replace(/[\s._]/g,"");
+const NAME_MAP = new Map();
+const rawNames = [];
+const ROM={"1":["I","1st","First"],"2":["II","2nd","Second"],"3":["III","3rd","Third"]};
+BOOKS.forEach(b=>{const vars=[];[b.en,...b.ea].forEach(nm=>{const m=nm&&nm.match(/^([123]) (.+)$/);if(m)ROM[m[1]].forEach(r=>vars.push(r+" "+m[2]));});[b.osis,b.zh,...b.zaAll,b.en,...b.ea,...vars].forEach(nm=>{if(!nm)return;const k=norm(nm);if(!NAME_MAP.has(k))NAME_MAP.set(k,b.n);rawNames.push(nm);});});
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const ALT = [...new Set(rawNames)].sort((a,b)=>b.length-a.length).map(n=>escRe(n).replace(/ /g,"\\s*")).join("|");
+const RANGE_SEP = "[-–—~～至到]";
+const REF_RE = new RegExp(`(?<![A-Za-z])(${ALT})\\.?\\s*(\\d{1,3})\\s*(?:(?:[:：]\\s*|章\\s*)(\\d{1,3})(?:\\s*節)?((?:\\s*${RANGE_SEP}\\s*\\d{1,3}(?:\\s*節)?)?)((?:\\s*[,，、]\\s*\\d{1,3}(?:\\s*${RANGE_SEP}\\s*\\d{1,3})?)*)|[章篇](?!\\s*\\d))`,"gi");
+
+function parseRefs(text){
+  const out=[]; if(!text) return out;
+  REF_RE.lastIndex=0; let m;
+  while((m=REF_RE.exec(text))){
+    const b=NAME_MAP.get(norm(m[1])); if(!b) continue;
+    const c=+m[2]; if(c<1||c>BOOKS[b-1].ch) continue;
+    if(m[3]===undefined){ out.push({b,c,v1:1,v2:999,whole:true,raw:m[0]}); continue; }
+    const v1=+m[3]; let v2=v1; const r=(m[4]||"").match(/\d+/); if(r) v2=Math.max(v1,+r[0]);
+    out.push({b,c,v1,v2,raw:m[0]});
+    if(m[5]) for(const p of m[5].matchAll(/(\d{1,3})(?:\s*[-–—~～至到]\s*(\d{1,3}))?/g)){const a=+p[1];out.push({b,c,v1:a,v2:Math.max(a,+(p[2]||a))});}
+  }
+  return out;
+}
+const bk = n => BOOKS[n-1];
+const vkey = (b,c,v)=>`${b}.${c}.${v}`;
+const splitKey = k => k.split(".").map(Number);
+function refLabel(r,short){const B=bk(r.b);const nm=short?B.za:B.zh;if(r.whole)return `${nm} ${r.c}章`;return `${nm} ${r.c}:${r.v1}${r.v2>r.v1?"-"+r.v2:""}`;}
+function keysLabel(keys,short){ // 連續的節合併
+  const arr=[...keys].map(splitKey).sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]);
+  const groups=[];
+  for(const [b,c,v] of arr){const g=groups[groups.length-1];if(g&&g.b===b&&g.c===c&&g.v2===v-1)g.v2=v;else groups.push({b,c,v1:v,v2:v});}
+  return groups;
+}
+
+/* ================= 小工具 ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ICON = {
+  x:'<svg class="i" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+  note:'<svg class="i" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>',
+  bm:'<svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  bmf:'<svg class="i" viewBox="0 0 24 24" style="fill:currentColor"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  copy:'<svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>',
+  back:'<svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>',
+  plus:'<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  up:'<svg class="i" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>',
+  trash:'<svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+  ban:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
+  left:'<svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>',
+  right:'<svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>',
+};
+const COLORS=[["yellow","黃"],["green","綠"],["blue","藍"],["pink","粉紅"],["orange","橘"]];
+let toastT; function toast(msg,ms=2200){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),ms);}
+function fmtDate(ts){const d=new Date(ts);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;}
+function debounce(fn,ms){let t;return (...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+function modal(html){$("#mbox").innerHTML=html;$("#modal").classList.add("show");}
+function closeModal(){$("#modal").classList.remove("show");}
+function ask(msg,okText="確定",danger=false){return new Promise(res=>{modal(`<h3>${esc(msg)}</h3><div class="acts"><button class="btn ghost" id="mNo">取消</button><button class="btn ${danger?"danger":""}" id="mOk">${esc(okText)}</button></div>`);$("#mNo").onclick=()=>{closeModal();res(false)};$("#mOk").onclick=()=>{closeModal();res(true)};});}
+async function copyText(text){try{await navigator.clipboard.writeText(text);toast("已複製");}catch(e){modal(`<h3>請手動複製</h3><textarea style="min-height:200px">${esc(text)}</textarea><div class="acts"><button class="btn" onclick="closeModal()">關閉</button></div>`);const ta=$("#mbox textarea");ta.focus();ta.select();}}
+
+/* ================= IndexedDB 快取（經文離線用） ================= */
+const IDB={db:null,
+  open(){if(this.db)return Promise.resolve(this.db);return new Promise((res)=>{try{const r=indexedDB.open("mybible",1);r.onupgradeneeded=()=>r.result.createObjectStore("bibles");r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>res(null);}catch(e){res(null)}});},
+  async get(k){const d=await this.open();if(!d)return null;return new Promise(res=>{try{const q=d.transaction("bibles").objectStore("bibles").get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);}catch(e){res(null)}});},
+  async put(k,v){const d=await this.open();if(!d)return;return new Promise(res=>{try{const tx=d.transaction("bibles","readwrite");tx.objectStore("bibles").put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>res();}catch(e){res();}});},
+  async del(k){const d=await this.open();if(!d)return;try{d.transaction("bibles","readwrite").objectStore("bibles").delete(k);}catch(e){}}
+};
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ================= 資料儲存（雲端 db；沒有就存本機） ================= */
+const DEF_SETTINGS={fontSize:22,lineHeight:1.85,theme:"light",font:"serif",bibles:[],shown:["cuv","kjv"],order:[],layout:"cols",orig:false,names:"both"};
+const BUILTIN=[{id:"cuv",name:"和合本（神版）",short:"和合本",lang:"zh",count:31021,file:"data/cuv.json",builtin:true,ver:2},{id:"kjv",name:"King James Version",short:"KJV",lang:"en",count:31102,file:"data/kjv.json",builtin:true,ver:1}];
+function allBibles(){const list=[...BUILTIN,...(S.settings.bibles||[])];const ord=S.settings.order||[];return list.map((e,i)=>[e,ord.indexOf(e.id)<0?1000+i:ord.indexOf(e.id)]).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);}
+const S={
+  mode:"local", assets:null,
+  settings:{...DEF_SETTINGS}, state:{b:43,c:3}, hl:{}, bm:{}, notes:new Map(),
+  bibles:{}, sel:new Set(), b:43, c:3, noteIndex:new Map(), view:"home", viewOpts:{}, plans:{}, origData:{}, lex:{}, xref:{}, morph:null, syncText:"",
+};
+/* ================= 本機儲存＋GitHub 同步 =================
+   每一筆資料（一則筆記、一節螢光筆、一個書籤…）都是一個項目 {v:內容, t:修改時間}。
+   同步時一項一項比對，較新的留下；刪除也記錄（v:null）。 */
+const SY={items:{},base:{},token:null,gistId:null,busy:false,again:false,last:0,err:""};
+const SYNC_FILE="my-bible-sync.json", SYNC_DESC="我的聖經 同步資料（請勿刪除）";
+function itemSet(key,v){SY.items[key]={v:v===undefined?null:v,t:Date.now()};}
+function itemVal(key){const it=SY.items[key];return it?it.v:null;}
+async function persistItems(){await IDB.put("__items",JSON.stringify(SY.items));await IDB.put("__base",JSON.stringify(SY.base));}
+const persistSoon=debounce(persistItems,300);
+function syncMap(prefix,map){ // 把整個 map 和項目比對，只記下有變的
+  const seen=new Set();
+  for(const [k,v] of Object.entries(map||{})){const key=prefix+k;seen.add(key);const cur=SY.items[key];if(!cur||JSON.stringify(cur.v)!==JSON.stringify(v))itemSet(key,v);}
+  for(const key of Object.keys(SY.items)){if(key.startsWith(prefix)&&!seen.has(key)&&SY.items[key].v!==null)itemSet(key,null);}
+}
+const Store={
+  write(id,data){
+    if(id==="settings")itemSet("s",data);
+    else if(id==="state")itemSet("st",data);
+    else if(id==="highlights")syncMap("h:",data.map);
+    else if(id==="bookmarks")syncMap("b:",data.map);
+    else if(id==="plans")syncMap("p:",data.map);
+    else if(id.startsWith("note-"))itemSet("n:"+id,data);
+    persistSoon(); scheduleSync(); updSync();
+  }
+};
+function rebuildFromItems(){
+  const I=SY.items; const pick=p=>{const o={};for(const [k,it] of Object.entries(I))if(k.startsWith(p)&&it.v!==null)o[k.slice(p.length)]=it.v;return o;};
+  S.settings={...DEF_SETTINGS,...(I.s&&I.s.v||{})};
+  S.hl=pick("h:"); S.bm=pick("b:"); S.plans=pick("p:");
+  const notes=new Map(Object.entries(pick("n:")));
+  if(NoteEd.id&&(NoteEd.dirty||NoteEd.mode==="edit")&&NoteEd.obj)notes.set(NoteEd.id,NoteEd.obj);
+  S.notes=notes;
+}
+function saveSettings(){S.settings={...S.settings};Store.write("settings",S.settings);}
+const saveState=debounce(()=>{S.state={b:S.b,c:S.c};Store.write("state",S.state);},1500);
+const saveHL=debounce(()=>Store.write("highlights",{map:S.hl}),400);
+const saveBM=debounce(()=>Store.write("bookmarks",{map:S.bm}),400);
+
+const GH="https://api.github.com";
+async function gh(path,opt={}){
+  const r=await fetch(GH+path,{...opt,cache:"no-store",headers:{Authorization:"token "+SY.token,Accept:"application/vnd.github+json",...(opt.body?{"Content-Type":"application/json"}:{})}});
+  if(!r.ok){const e=new Error("github "+r.status);e.status=r.status;throw e;}
+  return r.status===204?null:r.json();
+}
+async function findOrCreateGist(){
+  for(let page=1;page<=10;page++){const list=await gh(`/gists?per_page=100&page=${page}`);const g=list.find(x=>x.files&&x.files[SYNC_FILE]);if(g)return g.id;if(list.length<100)break;}
+  const g=await gh("/gists",{method:"POST",body:JSON.stringify({description:SYNC_DESC,public:false,files:{[SYNC_FILE]:{content:JSON.stringify({v:1,items:{}})}}})});
+  return g.id;
+}
+async function readGist(){
+  const g=await gh("/gists/"+SY.gistId); const f=g.files&&g.files[SYNC_FILE]; if(!f)return {};
+  let txt=f.content; if(f.truncated){const r=await fetch(f.raw_url,{cache:"no-store"});txt=await r.text();}
+  try{return (JSON.parse(txt)||{}).items||{};}catch(e){return {};}
+}
+function mergeItems(L,R,B){
+  const m={}; let conflicts=0; const now=Date.now();
+  for(const k of new Set([...Object.keys(L),...Object.keys(R)])){
+    const l=L[k],r=R[k];
+    if(!r){m[k]=l;continue;} if(!l){m[k]=r;continue;}
+    if(l.t===r.t){m[k]=l;continue;}
+    const bt=B[k]||0, win=l.t>r.t?l:r, lose=win===l?r:l; m[k]=win;
+    if(k.startsWith("n:")&&l.t>bt&&r.t>bt&&l.v&&r.v&&((l.v.body||"")!==(r.v.body||"")||(l.v.title||"")!==(r.v.title||""))){
+      const nid="n:note-"+now.toString(36)+Math.random().toString(36).slice(2,6)+conflicts;
+      m[nid]={v:{...lose.v,title:"（衝突副本）"+(lose.v.title||""),updated:now},t:now}; conflicts++;
+    }
+  }
+  const old=now-180*86400000; for(const k of Object.keys(m)){if(m[k].v===null&&m[k].t<old)delete m[k];} // 很久以前的刪除記錄清掉
+  return {merged:m,conflicts};
+}
+async function syncNow(){
+  if(!SY.token){updSync();return;}
+  if(!navigator.onLine){updSync();return;}
+  if(SY.busy){SY.again=true;return;}
+  SY.busy=true; setSync("同步中…");
+  const hadState=!!SY.items.st;
+  try{
+    if(!SY.gistId){SY.gistId=await findOrCreateGist();LS.set("mybible.gist",SY.gistId);}
+    const snap={...SY.items};
+    const remote=await readGist();
+    let {merged,conflicts}=mergeItems(snap,remote,SY.base);
+    for(const k of Object.keys(SY.items)){if(SY.items[k]!==snap[k]){merged[k]=SY.items[k];SY.again=true;}} // 同步途中又改的
+    const remoteChanged=Object.keys(merged).some(k=>!remote[k]||remote[k].t!==merged[k].t)||Object.keys(remote).some(k=>!merged[k]);
+    if(remoteChanged) await gh("/gists/"+SY.gistId,{method:"PATCH",body:JSON.stringify({files:{[SYNC_FILE]:{content:JSON.stringify({v:1,items:merged})}}})});
+    const localChanged=Object.keys(merged).some(k=>SY.items[k]!==merged[k])||Object.keys(SY.items).some(k=>!merged[k]);
+    SY.items=merged; SY.base={}; for(const k of Object.keys(merged))SY.base[k]=merged[k].t;
+    await persistItems();
+    if(localChanged){
+      rebuildFromItems();
+      if(!hadState&&SY.items.st&&SY.items.st.v&&SY.items.st.v.b&&S.view!=="read"){S.b=SY.items.st.v.b;S.c=SY.items.st.v.c||1;}
+      rebuildNoteIndex(); if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("input,textarea")))renderAll(); loadShownBibles(); Panels.refresh();
+    }
+    SY.last=Date.now(); LS.set("mybible.lastsync",SY.last); SY.err="";
+    if(conflicts) toast(`有 ${conflicts} 則筆記在兩台裝置都改過，舊的那份另存成「衝突副本」`,4000);
+  }catch(e){
+    if(e.status===401) SY.err="同步密碼無效，請到設定重新貼上";
+    else if(e.status===404){SY.err="找不到同步資料，下次會重新建立";SY.gistId=null;LS.set("mybible.gist",null);}
+    else if(e.status===403) SY.err="GitHub 暫時不讓同步，稍後再試";
+    else SY.err="同步失敗，稍後會自動再試";
+  }
+  SY.busy=false; updSync();
+  if(SY.again){SY.again=false;setTimeout(syncNow,800);}
+}
+const scheduleSync=debounce(()=>syncNow(),4000);
+function hm(t){const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
+function updSync(){
+  let t;
+  if(!SY.token)t="未設定同步（只存在這台裝置）";
+  else if(!navigator.onLine)t="離線中・連上網路會自動同步";
+  else if(SY.busy)t="同步中…";
+  else if(SY.err)t=SY.err;
+  else if(SY.last)t="已同步 "+hm(SY.last);
+  else t="等待同步…";
+  setSync(t);
+}
+window.addEventListener("online",()=>{updSync();syncNow();loadShownBibles();});
+window.addEventListener("offline",updSync);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")syncNow();else NoteEd.flushNow&&NoteEd.flushNow();});
+setInterval(()=>{if(document.visibilityState==="visible")syncNow();},120000);
+
+async function initStore(){
+  SY.token=LS.get("mybible.token"); SY.gistId=LS.get("mybible.gist"); SY.last=LS.get("mybible.lastsync")||0;
+  try{SY.items=JSON.parse(await IDB.get("__items")||"{}")||{};SY.base=JSON.parse(await IDB.get("__base")||"{}")||{};}catch(e){SY.items={};SY.base={};}
+  rebuildFromItems();
+  const st=itemVal("st"); if(st&&st.b){S.b=st.b;S.c=st.c||1;S.state=st;}
+  rebuildNoteIndex(); renderAll(); loadShownBibles(); updSync();
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+  if(SY.token) syncNow();
+}
+
+/* ---- 設定同步密碼 ---- */
+async function setToken(tok){
+  tok=(tok||"").trim(); if(!tok){toast("請先貼上同步密碼");return false;}
+  const old=SY.token; SY.token=tok;
+  try{await gh("/user");}catch(e){SY.token=old;toast(e.status===401?"這組密碼無效，請確認有完整複製":"現在連不上 GitHub，請確認網路");return false;}
+  LS.set("mybible.token",tok); SY.gistId=null; LS.set("mybible.gist",null); SY.base={};
+  toast("同步設定好了，正在同步…"); await syncNow(); return true;
+}
+function clearToken(){SY.token=null;LS.set("mybible.token",null);LS.set("mybible.gist",null);SY.gistId=null;updSync();}
+
+/* ---- 從 Claude 舊版搬資料 ---- */
+function importOld(txt){
+  let o; try{o=JSON.parse(txt.trim());}catch(e){toast("看不懂這段資料，請確認有完整貼上");return;}
+  if(!o||typeof o!=="object"||!("notes" in o||"hl" in o)){toast("這不是舊版匯出的資料");return;}
+  if(o.settings)itemSet("s",{...DEF_SETTINGS,...o.settings});
+  if(o.state)itemSet("st",o.state);
+  const mergeMap=(p,m)=>{for(const [k,v] of Object.entries(m||{}))itemSet(p+k,v);};
+  mergeMap("h:",o.hl); mergeMap("b:",o.bm); mergeMap("p:",o.plans);
+  let n=0; for(const [id,note] of (o.notes||[])){itemSet("n:"+id,note);n++;}
+  persistItems(); rebuildFromItems(); if(o.state&&o.state.b){S.b=o.state.b;S.c=o.state.c||1;}
+  rebuildNoteIndex(); renderAll(); syncNow();
+  toast(`搬好了：${n} 則筆記、${Object.keys(o.bm||{}).length} 個書籤、${Object.keys(o.hl||{}).length} 個螢光筆`,4000);
+}
+
+/* ---- 全部下載供離線使用 ---- */
+async function downloadAll(btn,prog){
+  const jobs=[["lex-greek","data/lex-greek.json"],["lex-hebrew","data/lex-hebrew.json"],["morph","data/morph.json"]];
+  for(let b=1;b<=66;b++){jobs.push([`orig-${b}`,`data/orig/${b}.json`]);jobs.push([`xref-${b}`,`data/xref/${b}.json`]);}
+  const key={"lex-greek":"lex-greek@1","lex-hebrew":"lex-hebrew@1","morph":"morph@1"};
+  btn.disabled=true; let done=0, fail=0;
+  for(const [k,url] of jobs){
+    const ck=key[k]||(k+"@1");
+    try{if(!(await IDB.get(ck))){const r=await fetch(url);if(!r.ok)throw 0;await IDB.put(ck,await r.text());}}catch(e){fail++;}
+    done++; prog.textContent=`下載中… ${Math.round(done/jobs.length*100)}%`;
+  }
+  for(const e of BUILTIN)await loadBible(e);
+  LS.set("mybible.allDownloaded",fail?0:Date.now());
+  prog.textContent=fail?`有 ${fail} 個檔案沒下載到，請在網路穩定時再按一次`:"全部下載好了，沒有網路也能看原文、字典和串珠 ✓";
+  btn.disabled=false;
+}
+
+/* ================= 譯本載入 ================= */
+const loading=new Set();
+async function loadBible(entry){
+  if(S.bibles[entry.id]||loading.has(entry.id))return; loading.add(entry.id);
+  try{
+    const ck=entry.builtin?entry.id+"@"+entry.ver:entry.id;
+    let txt=await IDB.get(ck);
+    if(!txt&&entry.file){const r=await fetch(entry.file);if(r.ok){txt=await r.text();IDB.put(ck,txt);}}
+    if(!txt&&entry.assetId){const r=await fetch("/_blob/"+entry.assetId);if(r.ok){txt=await r.text();IDB.put(entry.id,txt);}}
+    if(txt){S.bibles[entry.id]=JSON.parse(txt);renderMain();}
+  }catch(e){console.warn(e)}
+  loading.delete(entry.id);
+}
+function loadShownBibles(){allBibles().forEach(e=>{if(S.settings.shown.includes(e.id))loadBible(e);});}
+function shownEntries(){return allBibles().filter(e=>S.settings.shown.includes(e.id));}
+function primaryEntries(){const s=shownEntries();return s.length?s:allBibles().slice(0,2);}
+function verseText(id,b,c,v){const B=S.bibles[id];return B&&B.books[b-1]&&B.books[b-1][c-1]?B.books[b-1][c-1][v-1]:undefined;}
+function chapterCount(b){let n=0;for(const e of primaryEntries()){const B=S.bibles[e.id];if(B&&B.books[b-1])n=Math.max(n,B.books[b-1].length);}return n||bk(b).ch;}
+function verseCount(b,c){let n=0;for(const e of primaryEntries()){const B=S.bibles[e.id];const ch=B&&B.books[b-1]&&B.books[b-1][c-1];if(ch)n=Math.max(n,ch.length);}return n;}
+
+/* ================= 匯入檔案解析 ================= */
+function bookFromName(s){if(s==null)return 0;return NAME_MAP.get(norm(s))||0;}
+function normalizeBible(raw){
+  const t=raw.replace(/^﻿/,"");
+  const books=Array.from({length:66},()=>[]); let count=0;
+  const meta={name:"",short:"",lang:""};
+  const put=(b,c,v,text)=>{b=+b;c=+c;v=+v;if(!(b>=1&&b<=66&&c>=1&&v>=1))return;text=String(text??"").replace(/\s+/g," ").trim();if(!text)return;const ch=books[b-1][c-1]||(books[b-1][c-1]=[]);if(ch[v-1]===undefined)count++;ch[v-1]=text;};
+  let j=null; try{j=JSON.parse(t);}catch(e){}
+  if(j){
+    const src=j.metadata||j.meta||j;
+    meta.name=src.name||src.translation||src.version_name||src.title||"";
+    meta.short=src.shortName||src.abbreviation||src.short||(typeof src.version==="string"?src.version:"")||"";
+    meta.lang=src.language||src.lang||"";
+    const list=Array.isArray(j)?j:(j.books||j.Books||j.verses||j.data||j.bible||null);
+    if(Array.isArray(list)&&list.length){
+      if(list[0]&&typeof list[0]==="object"&&!Array.isArray(list[0])&&Array.isArray(list[0].chapters)){
+        list.forEach((B,idx)=>{
+          let b=+(B.bookId??B.book_id??B.id??B.number??0);
+          if(!(b>=1&&b<=66)) b = list.length===66?idx+1:(bookFromName(B.book)||bookFromName(B.englishName)||bookFromName(B.name)||bookFromName(B.abbrev)||(list.length===27?idx+40:0));
+          if(!b)return;
+          B.chapters.forEach((ch,ci)=>{
+            if(Array.isArray(ch)) ch.forEach((v,vi)=>put(b,ci+1,vi+1,typeof v==="string"?v:(v&&(v.text??v.t))));
+            else if(ch&&typeof ch==="object"){const cn=+(ch.chapter??ch.number??ch.c??(ci+1));(ch.verses||[]).forEach((v,vi)=>{if(typeof v==="string")put(b,cn,vi+1,v);else if(v)put(b,cn,v.number??v.verse??v.v??(vi+1),v.text??v.t);});}
+          });
+        });
+      } else {
+        list.forEach(v=>{
+          if(Array.isArray(v)){ if(v.length>=5)put(v[1],v[2],v[3],v[4]); else if(v.length===4)put(v[0],v[1],v[2],v[3]); return; }
+          if(!v||typeof v!=="object")return;
+          let b=+(v.book_id??v.bookId??v.b??0); if(!(b>=1&&b<=66)) b=+(v.book)||bookFromName(v.book)||bookFromName(v.book_name)||bookFromName(v.name);
+          put(b,v.chapter??v.c,v.verse??v.v??v.number,v.text??v.t);
+        });
+      }
+    } else if(j.resultset&&Array.isArray(j.resultset.row)){
+      j.resultset.row.forEach(r=>{const f=r.field||r;put(f[1],f[2],f[3],f[4]);});
+    } else if(typeof j==="object"){
+      for(const [k,v] of Object.entries(j)){ if(typeof v!=="string")continue; const r=parseRefs(k)[0]; if(r&&!r.whole)put(r.b,r.c,r.v1,v); }
+    }
+  } else {
+    t.split(/\r?\n/).forEach(line=>{
+      line=line.trim(); if(!line)return;
+      let m=line.match(/^(\d{1,2})\s*[\t,|]\s*(\d{1,3})\s*[\t,|]\s*(\d{1,3})\s*[\t,|]\s*(.+)$/);
+      if(m){put(m[1],m[2],m[3],m[4]);return;}
+      REF_RE.lastIndex=0; m=REF_RE.exec(line);
+      if(m&&m.index===0&&m[3]!==undefined){const b=NAME_MAP.get(norm(m[1]));put(b,m[2],m[3],line.slice(m[0].length));}
+    });
+  }
+  // 補空洞
+  books.forEach(B=>{for(let c=0;c<B.length;c++){if(!B[c])B[c]=[];for(let v=0;v<B[c].length;v++)if(B[c][v]===undefined)B[c][v]="";}});
+  const nBooks=books.filter(B=>B.length).length;
+  let lang=meta.lang; if(!lang){const s=(books[42][2]||[])[15]||(books[0][0]||[])[0]||"";lang=/[一-鿿]/.test(s)?"zh":"en";}
+  return {count,nBooks,meta,data:{v:1,lang,books}};
+}
+
+
+/* ================= 圖示 ================= */
+Object.assign(ICON,{
+  menu:'<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+  home:'<svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+  read:'<svg class="i" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5V19c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.5c-3-.5-6 0-8 1.5z"/><path d="M12 6v14.5"/></svg>',
+  toc:'<svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  sun:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  cal:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
+  bulb:'<svg class="i" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg>',
+  pen:'<svg class="i" viewBox="0 0 24 24"><path d="M15 4l5 5L9 20H4v-5z"/><path d="M13 6l5 5"/></svg>',
+  search:'<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  gear:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  link:'<svg class="i" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
+  check:'<svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>',
+  layout:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg>',
+  rows:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 12h18"/></svg>',
+  go:'<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+});
+
+/* ================= 書卷名稱、日期 ================= */
+function bname(b,short){const B=bk(b),m=S.settings.names||"both";if(m==="en")return B.en;return short?B.za:B.zh;}
+function refText(r){const B=bk(r.b);const vv=r.whole?"":`:${r.v1}${r.v2>r.v1?"-"+r.v2:""}`;return {zh:`${B.zh} ${r.c}${vv}`,en:`${B.en} ${r.c}${vv}`};}
+const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;};
+const dayDiff=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000);
+const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;};
+const WK="日一二三四五六";
+function zhDate(s){const d=new Date(s+"T00:00:00");return `${d.getMonth()+1}月${d.getDate()}日 星期${WK[d.getDay()]}`;}
+
+/* ================= 每日經文、主題 ================= */
+const DAILY=`約3:16|詩23:1|腓4:13|羅8:28|耶29:11|箴3:5-6|賽40:31|太11:28|約14:6|腓4:6-7|書1:9|詩46:1|林後5:17|加2:20|弗2:8-9|羅12:2|詩119:105|賽41:10|約壹1:9|太6:33|來11:1|雅1:5|彼前5:7|詩37:4|哀3:22-23|約16:33|林前13:4-7|羅5:8|太28:19-20|詩27:1|詩91:1-2|詩121:1-2|詩139:14|賽26:3|賽53:5|約1:1|約10:10|約11:25|約15:5|羅10:9|羅15:13|林後12:9|加5:22-23|弗3:20|弗6:10|腓1:6|西3:23|帖前5:16-18|提後1:7|提後3:16|來4:12|來12:1-2|來13:5|雅4:8|彼前2:9|約壹4:19|啟21:4|申31:6|詩16:11|詩34:8|詩103:2|箴16:3|箴18:10|傳3:1|賽43:2|賽55:8-9|耶33:3|彌6:8|番3:17|太5:16|太7:7|可10:27|路1:37|約8:12|約13:34|約14:27|徒1:8|羅8:38-39|羅12:12|林前10:13|林後4:16-18|加6:9|弗4:32|腓4:19|西3:2|來10:23|約壹4:18|詩19:14|詩51:10|詩62:1-2|詩84:11|詩118:24|詩145:18|尼8:10|撒上16:7|代下7:14|民6:24-26|書24:15|結36:26|約14:1-3`.split("|");
+const TOPICS=[
+ ["平安","約14:27|腓4:6-7|賽26:3|約16:33|西3:15|羅15:13"],
+ ["憂慮","太6:34|彼前5:7|腓4:6|詩55:22|太11:28-30|路12:25-26"],
+ ["害怕","賽41:10|提後1:7|詩27:1|詩56:3|約壹4:18|申31:6"],
+ ["饒恕","弗4:32|西3:13|太6:14-15|約壹1:9|詩103:12|路6:37"],
+ ["盼望","羅15:13|耶29:11|羅5:5|來6:19|哀3:21-23|詩42:11"],
+ ["愛","林前13:4-7|約壹4:7-8|約13:34-35|羅8:38-39|約15:13|羅5:8"],
+ ["信心","來11:1|來11:6|羅10:17|可11:22-24|雅1:6|弗2:8"],
+ ["喜樂","腓4:4|尼8:10|詩16:11|帖前5:16-18|雅1:2-3|約15:11"],
+ ["安慰","林後1:3-4|詩34:18|太5:4|詩23:4|啟21:4|詩147:3"],
+ ["力量","書1:9|賽40:31|腓4:13|林後12:9-10|詩46:1|弗6:10"],
+ ["智慧","雅1:5|箴3:5-6|箴9:10|箴2:6|西3:16|詩90:12"],
+ ["禱告","腓4:6|太6:6|帖前5:17|耶33:3|太7:7|雅5:16"],
+ ["感恩","帖前5:18|詩100:4|西3:17|詩107:1|詩103:2|弗5:20"],
+ ["試探","林前10:13|雅1:12|來4:15-16|太26:41|雅4:7|彼前5:8-9"],
+ ["引導","箴3:5-6|詩32:8|賽30:21|詩119:105|箴16:9|詩37:23"],
+ ["救恩","約3:16|羅10:9-10|弗2:8-9|徒4:12|羅6:23|約14:6"],
+ ["謙卑","雅4:10|腓2:3-4|彌6:8|彼前5:6|箴22:4|太23:12"],
+ ["家庭","書24:15|弗6:1-4|箴22:6|西3:18-21|詩127:1|弗5:25"],
+ ["工作","西3:23-24|箴16:3|傳9:10|林前15:58|帖後3:10|箴14:23"],
+ ["病痛","雅5:14-15|詩103:2-3|賽53:5|耶17:14|出15:26|詩147:3"],
+];
+function dailyRef(dateStr){const d=new Date(dateStr+"T00:00:00");const start=new Date(d.getFullYear(),0,1);const n=Math.floor((d-start)/86400000)+d.getFullYear();return parseRefs(DAILY[n%DAILY.length])[0];}
+function passageText(id,r,max=12){const out=[];const end=Math.min(r.v2,r.v1+max-1);for(let v=r.v1;v<=end;v++){const t=verseText(id,r.b,r.c,v);if(t)out.push(t);}return out.join(" ");}
+
+/* ================= 讀經計畫 ================= */
+function chapList(b0,b1){const a=[];for(let b=b0;b<=b1;b++)for(let c=1;c<=bk(b).ch;c++)a.push([b,c]);return a;}
+function splitDays(list,days){const out=[];for(let i=0;i<days;i++)out.push(list.slice(Math.floor(i*list.length/days),Math.floor((i+1)*list.length/days)));return out;}
+const PLANS={
+  bible1y:{t:"一年讀完聖經",d:"從創世記讀到啟示錄，每天約 3–4 章。",days:365,color:"#8a5a2b",gen:()=>splitDays(chapList(1,66),365)},
+  otnt1y:{t:"一年讀經（舊約＋新約）",d:"每天一段舊約加一段新約，一年讀完全本。",days:365,color:"#5a6f8a",gen:()=>{const o=splitDays(chapList(1,39),365),n=splitDays(chapList(40,66),365);return o.map((x,i)=>[...x,...n[i]]);}},
+  nt90:{t:"90 天讀完新約",d:"馬太福音到啟示錄，每天約 3 章。",days:90,color:"#4f7d5c",gen:()=>splitDays(chapList(40,66),90)},
+  gospels30:{t:"30 天讀四福音",d:"跟著耶穌的生平，每天約 3 章。",days:30,color:"#a0574b",gen:()=>splitDays(chapList(40,43),30)},
+  pspr31:{t:"一個月詩篇與箴言",d:"每天 5 篇詩篇＋1 章箴言，31 天讀完。",days:31,color:"#7a5a8a",gen:()=>Array.from({length:31},(_,i)=>{const d=i+1;const a=[];for(let k=0;k<5;k++){const p=d+30*k;if(p<=150)a.push([19,p]);}a.push([20,d]);return a;})},
+  acts28:{t:"28 天讀使徒行傳",d:"每天一章，看初代教會怎麼開始。",days:28,color:"#3f7f8a",gen:()=>splitDays(chapList(44,44),28)},
+};
+const planCache={};
+function planDays(id){if(!planCache[id])planCache[id]=PLANS[id].gen();return planCache[id];}
+function groupReading(list){const g=[];for(const [b,c] of list){const l=g[g.length-1];if(l&&l.b===b&&l.c2===c-1)l.c2=c;else g.push({b,c1:c,c2:c});}return g;}
+function readingLabel(gr){return `${bname(gr.b)} ${gr.c1}${gr.c2>gr.c1?"–"+gr.c2:""}`;}
+function savePlans(){S.plans={...S.plans};Store.write("plans",{map:S.plans});}
+function planToday(p){return Math.min(PLANS[p.id].days,Math.max(1,dayDiff(p.start,todayStr())+1));}
+function activePlans(){return Object.entries(S.plans||{}).filter(([id])=>PLANS[id]).map(([id,p])=>({id,...p}));}
+
+/* ================= 原文、字典、串珠載入 ================= */
+async function cachedJSON(key,url){
+  let txt=await IDB.get(key);
+  if(!txt){const r=await fetch(url);if(!r.ok)throw new Error("load "+url);txt=await r.text();IDB.put(key,txt);}
+  return JSON.parse(txt);
+}
+const pend={};
+function once(key,fn){if(!pend[key])pend[key]=fn().catch(e=>{delete pend[key];throw e;});return pend[key];}
+function loadOrig(b){if(S.origData[b])return Promise.resolve(S.origData[b]);return once("o"+b,async()=>{const d=await cachedJSON(`orig-${b}@1`,`data/orig/${b}.json`);S.origData[b]=d;return d;});}
+function loadLex(lang){return once("lex"+lang,async()=>{const [L,M]=await Promise.all([cachedJSON(`lex-${lang}@1`,`data/lex-${lang}.json`),S.morph?Promise.resolve(S.morph):cachedJSON("morph@1","data/morph.json")]);S.lex[lang]=L;S.morph=M;return L;});}
+function loadXref(b){if(S.xref[b])return Promise.resolve(S.xref[b]);return once("x"+b,async()=>{const d=await cachedJSON(`xref-${b}@1`,`data/xref/${b}.json`);S.xref[b]=d;return d;});}
+const decRef=n=>({b:Math.floor(n/1e6),c:Math.floor(n/1e3)%1000,v:n%1000});
+
+/* ================= 版面：側欄 ================= */
+const NAV=[["home","首頁","home"],["read","讀經","read"],["toc","目錄","toc"],["daily","每日經文","sun"],["plans","讀經計畫","cal"],["topics","主題經文","bulb"],"-",["bm","書籤","bm"],["hl","螢光筆","pen"],["notes","筆記","note"],["search","搜尋","search"],"-",["settings","設定","gear"]];
+function renderNav(){
+  const cur=S.view;
+  $("#nav").innerHTML=NAV.map(n=>n==="-"?"<hr>":`<button data-nav="${n[0]}" class="${n[0]===cur?"on":""}">${ICON[n[2]]}${n[1]}</button>`).join("");
+  $("#sidefoot").innerHTML=`<span id="sync2"></span>`;
+}
+$("#nav").addEventListener("click",e=>{const b=e.target.closest("[data-nav]");if(!b)return;const k=b.dataset.nav;closeSide();
+  if(["home","read","daily","plans","topics"].includes(k)){setView(k);return;}
+  if(k==="toc"){Panels.open("books");return;}
+  if(k==="bm")Panels.open("marks",{tab:"bm"});else if(k==="hl")Panels.open("marks",{tab:"hl"});else Panels.open(k);
+});
+function toggleSide(){if(window.innerWidth<1000)document.body.classList.toggle("sideopen");else{document.body.classList.toggle("noside");LS.set("mybible.noside",document.body.classList.contains("noside"));}}
+function closeSide(){document.body.classList.remove("sideopen");}
+$("#sidescrim").onclick=closeSide;
+if(LS.get("mybible.noside"))document.body.classList.add("noside");
+
+function setView(v,opts={}){S.view=v;S.lastRendered=null;S.viewOpts=opts;if(v!=="read"){S.sel.clear();}renderAll();window.scrollTo({top:0});}
+
+/* ================= 版面：頂部 ================= */
+function renderTop(){
+  const right=`<div class="grow"></div><button class="ib" data-panel="search" title="搜尋">${ICON.search}</button><button class="ib" data-panel="notes" title="筆記">${ICON.note}</button><button class="ib" data-panel="marks" title="書籤與螢光筆">${ICON.bm}</button><button class="ib" data-panel="settings" title="設定">${ICON.gear}</button>`;
+  const menu=`<button class="ib" id="menuBtn" title="選單">${ICON.menu}</button>`;
+  const syncTxt=S.syncText||"";
+  if(S.view==="read"){
+    const B=bk(S.b);const m=S.settings.names||"both";
+    const title=m==="en"?esc(B.en):`<span class="bfull">${esc(B.zh)}</span><span class="bshort">${esc(B.za)}</span>${m==="both"?` <small>${esc(B.en)}</small>`:""}`;
+    $("#bar").innerHTML=`${menu}<button class="ib" id="prevC" title="上一章">${ICON.left}</button><button id="where" title="換書卷">${title}<span class="car">▾</span></button><button id="chapBtn" title="換章">${S.c}<span class="car">▾</span></button><button id="verseBtn" title="跳到某一節">節<span class="car">▾</span></button><button class="ib" id="nextC" title="下一章">${ICON.right}</button>${right}`;
+    const bibs=allBibles();
+    $("#chips").style.display="";
+    $("#chips").innerHTML=`<span class="lbl">對照：</span>`+bibs.map(e=>`<button class="chip ${S.settings.shown.includes(e.id)?"on":""}" data-bib="${e.id}">${esc(e.short||e.name)}</button>`).join("")+
+      `<button class="chip ${S.settings.orig?"on":""}" data-orig="1">${S.b>=40?"希臘文":"希伯來文"}原文</button><span class="vsep"></span>`+
+      `<button class="chip ${S.settings.xr!==false?"on":""}" data-xrchip="1">串珠</button><span class="vsep"></span><button class="chip ${S.settings.layout!=="inter"?"on":""}" data-layout="cols">並排</button><button class="chip ${S.settings.layout==="inter"?"on":""}" data-layout="inter">上下</button>`+
+      `<span id="sync">${esc(syncTxt)}</span>`;
+    $("#prevC").onclick=()=>{const p=prevChap();if(p)goTo(p[0],p[1]);};
+    $("#nextC").onclick=()=>{const n=nextChap();if(n)goTo(n[0],n[1]);};
+    $("#where").onclick=()=>Panels.open("books");$("#chapBtn").onclick=()=>Panels.open("books",{book:S.b});$("#verseBtn").onclick=()=>Panels.open("books",{book:S.b,chap:S.c});
+  } else {
+    const t={home:"首頁",daily:"每日經文",plans:"讀經計畫",topics:"主題經文"}[S.view]||"";
+    $("#bar").innerHTML=`${menu}<span id="vtitle">${t}</span>${right}`;
+    $("#chips").style.display="none";$("#chips").innerHTML="";
+  }
+  $("#menuBtn").onclick=toggleSide;
+  $("#bar").querySelectorAll("[data-panel]").forEach(b=>{b.classList.toggle("on",Panels.cur===b.dataset.panel);b.onclick=()=>{if(Panels.cur===b.dataset.panel)Panels.close();else Panels.open(b.dataset.panel);};});
+}
+$("#chips").addEventListener("click",e=>{
+  const o=e.target.closest("[data-orig]"); if(o){S.settings.orig=!S.settings.orig;saveSettings();renderAll();if(S.settings.orig)loadOrig(S.b).then(()=>renderReader()).catch(()=>toast("原文載入失敗"));return;}
+  const xc=e.target.closest("[data-xrchip]"); if(xc){S.settings.xr=S.settings.xr===false;saveSettings();renderAll();return;}
+  const l=e.target.closest("[data-layout]"); if(l){S.settings.layout=l.dataset.layout;saveSettings();renderAll();return;}
+  const btn=e.target.closest("[data-bib]");if(!btn)return;const id=btn.dataset.bib;let sh=[...S.settings.shown];
+  if(sh.includes(id)){if(sh.length===1&&!S.settings.orig){toast("至少要顯示一個譯本");return;}sh=sh.filter(x=>x!==id);}else{sh.push(id);sh=allBibles().map(b=>b.id).filter(x=>sh.includes(x));}
+  S.settings.shown=sh;saveSettings();loadShownBibles();renderAll();});
+function setSync(t){S.syncText=t;const st=document.getElementById("syState");if(st)st.textContent=t;const el=$("#sync");if(el)el.textContent=t;const e2=$("#sync2");if(e2)e2.textContent="雲端："+t;}
+
+/* ================= 主畫面分派 ================= */
+function renderAll(){applyTheme();renderNav();renderTop();renderMain();renderAct();setSync(S.syncText||"");}
+function renderMain(){
+  if(S.view==="read")return renderReader();
+  const f={home:renderHome,daily:renderDaily,plans:renderPlans,topics:renderTopics}[S.view];
+  if(f)f();
+}
+
+/* ================= 首頁 ================= */
+function verseCardHTML(r,dateLabel,variant=""){
+  const ents=primaryEntries().filter(e=>S.bibles[e.id]);const zhE=ents.find(e=>S.bibles[e.id].lang!=="en")||ents[0];const enE=ents.find(e=>S.bibles[e.id].lang==="en"&&e!==zhE);
+  const t1=zhE?passageText(zhE.id,r):"…",t2=enE?passageText(enE.id,r):"";const rt=refText(r);
+  return `<div class="dv ${variant}"><span class="tagline">${esc(dateLabel)}</span><div class="ref">${esc(rt.zh)}　·　${esc(rt.en)}</div><div class="txt">${esc(t1)}</div>${t2?`<div class="en">${esc(t2)}</div>`:""}
+   <div class="acts"><button data-dvgo="${r.b}.${r.c}.${r.v1}">${ICON.read}讀這一章</button><button data-dvcopy="${r.b}.${r.c}.${r.v1}.${r.v2}">${ICON.copy}複製</button><button data-dvnote="${r.b}.${r.c}.${r.v1}.${r.v2}">${ICON.note}寫筆記</button></div></div>`;
+}
+function bindVerseCard(root){
+  root.querySelectorAll("[data-dvgo]").forEach(b=>b.onclick=()=>{const [x,c,v]=b.dataset.dvgo.split(".").map(Number);goTo(x,c,v);});
+  root.querySelectorAll("[data-dvcopy]").forEach(b=>b.onclick=()=>{const [x,c,v1,v2]=b.dataset.dvcopy.split(".").map(Number);const keys=[];for(let v=v1;v<=v2;v++)keys.push(vkey(x,c,v));copyText(selectionText(keys));});
+  root.querySelectorAll("[data-dvnote]").forEach(b=>b.onclick=()=>{const [x,c,v1,v2]=b.dataset.dvnote.split(".").map(Number);const keys=[];for(let v=v1;v<=v2;v++)keys.push(vkey(x,c,v));Panels.open("notes",{newWith:keys});});
+}
+function renderHome(){
+  const td=todayStr(); const r=dailyRef(td); const plans=activePlans();
+  const recent=[...S.notes.entries()].sort((a,b)=>(b[1].updated||0)-(a[1].updated||0)).slice(0,3);
+  const h=new Date().getHours(); const hi=h<11?"早安":h<18?"午安":"晚安";
+  let html=`<div class="page"><div class="hello"><h2>${hi}，願神賜福你今天</h2><p>${zhDate(td)}</p></div>
+  <div class="grid2"><div>${verseCardHTML(r,"今日經文")}</div>
+  <div style="display:flex;flex-direction:column;gap:18px">
+   <div class="card"><h3>${ICON.read}繼續讀經</h3><div style="font-size:20px;font-family:var(--vfont);margin:4px 0 2px">${esc(bk(S.b).zh)} ${S.c} 章</div><div class="muted" style="font-family:Georgia,serif">${esc(bk(S.b).en)} ${S.c}</div><div style="margin-top:12px"><button class="btn" id="hContinue">${ICON.go}繼續</button></div></div>
+   <div class="card"><h3>${ICON.cal}讀經計畫<button class="more" id="hPlans">全部 ›</button></h3>${plans.length?plans.map(p=>planMini(p)).join(""):`<p class="hint" style="margin:0 0 10px">還沒有開始讀經計畫。</p><button class="btn ghost sm" id="hPlans2">挑一個計畫</button>`}</div>
+  </div></div>
+  <div class="card" style="margin-top:18px"><h3>${ICON.bulb}我想找關於…的經文</h3><div class="topics">${TOPICS.map((t,i)=>`<button data-topic="${i}">${t[0]}</button>`).join("")}</div></div>
+  <div class="card" style="margin-top:18px"><h3>${ICON.note}最近的筆記<button class="more" id="hNotes">全部 ›</button></h3>${recent.length?`<div class="list">${recent.map(([id,n])=>{const first=(n.body||"").split("\n").find(x=>x.trim())||"";return `<div class="item" data-hnote="${id}"><b>${esc(n.title||first.slice(0,30)||"（未命名筆記）")}</b><div class="meta">${fmtDate(n.updated||n.created)}</div></div>`;}).join("")}</div>`:`<p class="hint" style="margin:0">讀經時點選經文 →「筆記」就能寫。</p>`}</div>
+  </div>`;
+  $("#view").innerHTML=html;
+  bindVerseCard($("#view"));
+  $("#hContinue").onclick=()=>goTo(S.b,S.c);
+  [$("#hPlans"),$("#hPlans2")].forEach(b=>b&&(b.onclick=()=>setView("plans")));
+  $("#hNotes").onclick=()=>Panels.open("notes");
+  $("#view").querySelectorAll("[data-topic]").forEach(b=>b.onclick=()=>setView("topics",{i:+b.dataset.topic}));
+  $("#view").querySelectorAll("[data-hnote]").forEach(b=>b.onclick=()=>Panels.open("notes",{edit:b.dataset.hnote}));
+  bindPlanMini($("#view"));
+}
+function planMini(p){
+  const P=PLANS[p.id];const day=planToday(p);const done=new Set(p.done||[]);const pct=Math.round(done.size/P.days*100);
+  const today=groupReading(planDays(p.id)[day-1]||[]);
+  return `<div style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><b>${esc(P.t)}</b><span class="small muted">第 ${day} 天 · ${pct}%</span></div>
+   <div class="prog" style="margin:8px 0"><div style="width:${pct}%"></div></div>
+   <div class="rd">${today.map(g=>`<button data-pgo="${g.b}.${g.c1}" class="${done.has(day)?"done":""}">${esc(readingLabel(g))}</button>`).join("")}
+   <button data-pdone="${p.id}.${day}" class="${done.has(day)?"done":""}">${done.has(day)?"✓ 今天完成了":"標記完成"}</button></div></div>`;
+}
+function bindPlanMini(root){
+  root.querySelectorAll("[data-pgo]").forEach(b=>b.onclick=()=>{const [x,c]=b.dataset.pgo.split(".").map(Number);goTo(x,c);});
+  root.querySelectorAll("[data-pdone]").forEach(b=>b.onclick=()=>{const [id,d]=b.dataset.pdone.split(".");togglePlanDay(id,+d);});
+}
+function togglePlanDay(id,d){const p=S.plans[id];if(!p)return;const s=new Set(p.done||[]);if(s.has(d))s.delete(d);else s.add(d);S.plans[id]={...p,done:[...s].sort((a,b)=>a-b)};savePlans();renderMain();}
+
+/* ================= 每日經文 ================= */
+function renderDaily(){
+  const off=S.viewOpts.off||0; const ds=addDays(todayStr(),off); const r=dailyRef(ds);
+  const variants=["","v2","v3"];
+  $("#view").innerHTML=`<div class="page" style="max-width:820px">
+   <div class="row" style="justify-content:space-between;margin:6px 0 14px"><button class="btn ghost sm" id="dPrev">${ICON.left}前一天</button><b>${zhDate(ds)}</b><button class="btn ghost sm" id="dNext" ${off>=0?"disabled style='opacity:.4'":""}>後一天${ICON.right}</button></div>
+   ${verseCardHTML(r,off===0?"今日經文":zhDate(ds),variants[(Math.abs(off))%3])}
+   <div class="card" style="margin-top:18px"><h3>${ICON.toc}上下文</h3><div id="dCtx"></div></div></div>`;
+  bindVerseCard($("#view"));
+  $("#dPrev").onclick=()=>setView("daily",{off:off-1});
+  if(off<0)$("#dNext").onclick=()=>setView("daily",{off:off+1});
+  const e=primaryEntries().find(e=>S.bibles[e.id]);
+  if(e){const n=verseCount(r.b,r.c);const a=Math.max(1,r.v1-3),z=Math.min(n,r.v2+3);let h="";for(let v=a;v<=z;v++){const t=verseText(e.id,r.b,r.c,v);h+=`<p style="font-family:var(--vfont);font-size:19px;line-height:1.8;margin:4px 0;${v>=r.v1&&v<=r.v2?"background:var(--h-yellow);border-radius:6px;padding:2px 6px":""}"><sup style="color:var(--accent);font-size:.6em;margin-right:4px">${v}</sup>${esc(t||"")}</p>`;}$("#dCtx").innerHTML=h;}
+}
+
+/* ================= 讀經計畫頁 ================= */
+function renderPlans(){
+  const act=activePlans(); const open=S.viewOpts.open;
+  let h=`<div class="page">`;
+  if(act.length){
+    h+=`<h3 style="margin:6px 4px 12px">我的計畫</h3><div class="list" style="gap:14px">`;
+    act.forEach(p=>{const P=PLANS[p.id];const day=planToday(p);const done=new Set(p.done||[]);const pct=Math.round(done.size/P.days*100);const days=planDays(p.id);
+      h+=`<div class="card"><div class="plan"><div class="ico" style="background:${P.color}">${P.days}</div><div style="flex:1;min-width:0"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><b style="font-size:18px">${esc(P.t)}</b><span class="small muted">開始於 ${p.start.replace(/-/g,"/")} · 已完成 ${done.size}/${P.days} 天</span></div>
+      <div class="prog" style="margin:10px 0"><div style="width:${pct}%"></div></div>
+      <div class="small muted">今天是第 ${day} 天：</div>${planMini(p).replace(/^<div style="margin-bottom:14px">[\s\S]*?<div class="rd">/,'<div><div class="rd">')}
+      <div class="row" style="gap:8px;margin-top:4px"><button class="btn ghost sm" data-popen="${p.id}">${open===p.id?"收起":"全部天數"}</button><button class="btn danger sm" data-pstop="${p.id}">停止計畫</button></div>
+      ${open===p.id?`<div class="days">${days.map((list,i)=>`<button class="day ${done.has(i+1)?"done":""} ${i+1===day?"today":""}" data-pday="${p.id}.${i+1}"><span class="ck">${done.has(i+1)?ICON.check:""}</span><span><b>第 ${i+1} 天</b><br>${groupReading(list).map(g=>esc(readingLabel(g))).join("、")}</span></button>`).join("")}</div>`:""}
+      </div></div></div>`;});
+    h+=`</div>`;
+  }
+  h+=`<h3 style="margin:22px 4px 12px">選一個計畫開始</h3><div class="list" style="gap:12px">`;
+  Object.entries(PLANS).forEach(([id,P])=>{const on=!!S.plans[id];h+=`<div class="card"><div class="plan"><div class="ico" style="background:${P.color}">${P.days}</div><div style="flex:1"><b style="font-size:18px">${esc(P.t)}</b><div class="hint" style="margin:2px 0 8px">${esc(P.d)}（${P.days} 天）</div>${on?`<span class="tag">進行中</span>`:`<button class="btn sm" data-pstart="${id}">今天開始</button>`}</div></div></div>`;});
+  h+=`</div></div>`;
+  $("#view").innerHTML=h;
+  const V=$("#view"); bindPlanMini(V);
+  V.querySelectorAll("[data-pstart]").forEach(b=>b.onclick=()=>{S.plans={...S.plans,[b.dataset.pstart]:{start:todayStr(),done:[]}};savePlans();toast("計畫開始了！");renderPlans();});
+  V.querySelectorAll("[data-pstop]").forEach(b=>b.onclick=async()=>{if(!await ask("確定停止這個計畫？進度會被清除。","停止",true))return;const m={...S.plans};delete m[b.dataset.pstop];S.plans=m;savePlans();renderPlans();});
+  V.querySelectorAll("[data-popen]").forEach(b=>b.onclick=()=>setView("plans",{open:open===b.dataset.popen?null:b.dataset.popen}));
+  V.querySelectorAll("[data-pday]").forEach(b=>b.onclick=()=>{const [id,d]=b.dataset.pday.split(".");togglePlanDay(id,+d);});
+}
+
+/* ================= 主題經文頁 ================= */
+function renderTopics(){
+  const i=S.viewOpts.i??0; const T=TOPICS[i]; const ents=primaryEntries().filter(e=>S.bibles[e.id]);
+  const refs=parseRefs(T[1].replace(/\|/g," "));
+  $("#view").innerHTML=`<div class="page"><div class="card"><h3>${ICON.bulb}我想找關於…的經文</h3><div class="topics">${TOPICS.map((t,k)=>`<button data-topic="${k}" class="${k===i?"on":""}">${t[0]}</button>`).join("")}</div></div>
+   <h3 style="margin:20px 4px 10px">「${esc(T[0])}」相關經文</h3><div class="list">${refs.map(r=>{const rt=refText(r);return `<div class="item" data-jump="${r.b}.${r.c}.${r.v1}"><div class="ref">${esc(rt.zh)} <span class="muted" style="font-weight:400;font-family:Georgia,serif">· ${esc(rt.en)}</span></div>${ents.map((e,k)=>`<div class="${k?"tx2":"tx"}">${esc(passageText(e.id,r))}</div>`).join("")}</div>`;}).join("")}</div></div>`;
+  $("#view").querySelectorAll("[data-topic]").forEach(b=>b.onclick=()=>setView("topics",{i:+b.dataset.topic}));
+  $("#view").querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>{const [x,c,v]=b.dataset.jump.split(".").map(Number);goTo(x,c,v);});
+}
+
+/* ================= 讀經畫面 ================= */
+function rebuildNoteIndex(){
+  const idx=new Map(); const add=(k,id)=>{if(!idx.has(k))idx.set(k,new Set());idx.get(k).add(id);};
+  for(const [id,n] of S.notes){(n.anchors||[]).forEach(k=>add(k,id));parseRefs((n.title||"")+"\n"+(n.body||"")).forEach(r=>{if(r.whole)return;for(let v=r.v1;v<=Math.min(r.v2,r.v1+80);v++)add(vkey(r.b,r.c,v),id);});}
+  S.noteIndex=idx;
+}
+function ilHTML(words,b){
+  const he=b<40; return `<div class="il ${he?"he":"gr"}">${words.map((w,i)=>`<span class="w" data-wi="${i}"><b>${esc(w[0])}</b><i>${esc(w[1])}</i><small>${esc(w[2])}</small></span>`).join("")}</div>`;
+}
+function readerAnchor(){
+  // 以畫面最上方正在看的那一節為準（就算只露出一部分）
+  const top=($("#top").getBoundingClientRect().bottom||0);
+  for(const el of document.querySelectorAll("#view .v")){const r=el.getBoundingClientRect();if(r.bottom>top+24)return {id:el.id,off:r.top};}
+  return null;
+}
+let ancLock=null;
+function renderReader(){
+  if(S.view!=="read")return;
+  const same=S.lastRendered===S.b+"."+S.c; const ps=S.pendingScroll&&Date.now()<S.pendingScroll.until&&S.pendingScroll.ch===S.b+"."+S.c?S.pendingScroll:null;
+  const anc=same&&!ps?readerAnchor():null;
+  renderReaderInner();
+  S.lastRendered=S.b+"."+S.c;
+  if(ps&&same){const el=document.getElementById("v"+ps.v);if(el)window.scrollTo(0,el.getBoundingClientRect().top+window.scrollY-130);}
+  if(anc){const el=document.getElementById(anc.id);if(el)window.scrollBy(0,el.getBoundingClientRect().top-anc.off);ancLock={...anc,until:Date.now()+3000};}
+}
+if(window.ResizeObserver){new ResizeObserver(()=>{if(!ancLock||S.view!=="read")return;if(Date.now()>ancLock.until){ancLock=null;return;}const el=document.getElementById(ancLock.id);if(el){const d=el.getBoundingClientRect().top-ancLock.off;if(Math.abs(d)>1)window.scrollBy(0,d);}}).observe(document.getElementById("view"));}
+["touchstart","wheel","keydown"].forEach(ev=>window.addEventListener(ev,e=>{ancLock=null;S.pendingScroll=null;if(ev!=="keydown"&&!(e.target.closest&&e.target.closest(".v,#top,#drawer,#act")))S.focusV=null;},{passive:true}));
+window.addEventListener("scroll",()=>{if(!ancLock&&!S.pendingScroll&&S.focusV){const el=document.getElementById("v"+S.focusV.v);if(el){const r=el.getBoundingClientRect();if(r.bottom<0||r.top>window.innerHeight)S.focusV=null;}}},{passive:true});
+function renderReaderInner(){
+  const R=$("#view");
+  const ents=shownEntries(); const loaded=ents.filter(e=>S.bibles[e.id]); const B=bk(S.b);
+  const orig=S.settings.orig; const OD=orig?S.origData[S.b]:null;
+  const XR=S.settings.xr!==false?S.xref[S.b]:null;
+  if(S.settings.xr!==false&&!XR) loadXref(S.b).then(()=>renderReader()).catch(()=>{});
+  if(orig&&!OD) loadOrig(S.b).then(()=>renderReader()).catch(()=>toast("原文載入失敗"));
+  if(!loaded.length&&!orig){R.innerHTML=`<div class="empty"><h2>正在載入經文…</h2><p class="muted">第一次在這台裝置打開，要下載譯本資料，請稍等幾秒。</p></div>`;return;}
+  let n=verseCount(S.b,S.c); if(OD&&OD.ch[S.c-1])n=Math.max(n,OD.ch[S.c-1].length);
+  const inter=S.settings.layout==="inter"||ents.length<2; const cols=`grid-template-columns:repeat(${ents.length},1fr)`;
+  const m=S.settings.names||"both";
+  let h=`<div class="chead"><h1>${esc(m==="en"?B.en:B.zh)} ${m==="en"?"":"第 "}${S.c}${m==="en"?"":(S.b===19?" 篇":" 章")}</h1>${m==="both"?`<span>${esc(B.en)} ${S.c}</span>`:""}</div>`;
+  if(!inter) h+=`<div class="colnames" style="${cols}">${ents.map(e=>`<div>${esc(e.short||e.name)}</div>`).join("")}</div>`;
+  if(orig&&!OD) h+=`<p class="hint" style="padding:0 12px">原文載入中…</p>`;
+  for(let v=1;v<=n;v++){
+    const k=vkey(S.b,S.c,v); const hl=S.hl[k]; const hasN=S.noteIndex.has(k); const hasB=!!S.bm[k];
+    const cls=["v"]; if(hl)cls.push("hl-"+hl); if(S.sel.has(k))cls.push("sel"); if(hasN||hasB)cls.push("hasmk");
+    h+=`<div class="${cls.join(" ")}" data-v="${v}" id="v${v}"><div class="${inter?"stack":"cols"}" ${inter?"":`style="${cols}"`}>`;
+    ents.forEach((e,i)=>{const t=S.bibles[e.id]?verseText(e.id,S.b,S.c,v):null;const lang=S.bibles[e.id]?S.bibles[e.id].lang:e.lang;
+      const drop=v===1&&i===0;
+      const xn=(i===0&&XR&&XR[S.c]&&XR[S.c][v])?XR[S.c][v].length:0;
+      h+=`<div class="t ${lang==="en"?"en":""} ${inter&&i>0?"sub":""}">${drop?`<span class="drop">${S.c}</span>`:`<sup>${v}</sup>`}${t==null?'<span class="muted">…</span>':esc(t)}${xn?`<button class="xr" data-xr="${k}" title="串珠：相關經文">${ICON.link}${xn}</button>`:""}</div>`;});
+    h+=`</div>`;
+    if(OD){const words=(OD.ch[S.c-1]||[])[v-1]||[];if(words.length)h+=ilHTML(words,S.b);}
+    if(hasN||hasB) h+=`<div class="marks">${hasB?`<span class="mk">${ICON.bmf}</span>`:""}${hasN?`<button class="mk nm" data-notes="${k}" title="看筆記">${ICON.note}</button>`:""}</div>`;
+    h+=`</div>`;
+  }
+  const prev=prevChap(),next=nextChap();
+  h+=`<div class="cnav"><button data-go="${prev?prev.join("."):""}" ${prev?"":"style='visibility:hidden'"}>${ICON.left}${prev?esc(bname(prev[0],true))+" "+prev[1]:""}</button><button data-go="${next?next.join("."):""}" ${next?"":"style='visibility:hidden'"}>${next?esc(bname(next[0],true))+" "+next[1]:""}${ICON.right}</button></div>`;
+  R.innerHTML=h;
+}
+function prevChap(){if(S.c>1)return [S.b,S.c-1];if(S.b>1)return [S.b-1,chapterCount(S.b-1)];return null;}
+function nextChap(){if(S.c<chapterCount(S.b))return [S.b,S.c+1];if(S.b<66)return [S.b+1,1];return null;}
+function goTo(b,c,v,{keepSel}={}){
+  b=Math.min(66,Math.max(1,b));c=Math.min(chapterCount(b),Math.max(1,c));
+  const changed=b!==S.b||c!==S.c||S.view!=="read"; S.b=b;S.c=c; if(changed&&!keepSel)S.sel.clear();
+  S.view="read"; renderAll(); saveState();
+  if(window.innerWidth<1000&&Panels.cur&&Panels.cur!=="notes")Panels.close();
+  S.focusV=v?{ch:b+"."+c,v}:null;
+  if(v){ancLock=null;S.pendingScroll={ch:b+"."+c,v,until:Date.now()+2500};requestAnimationFrame(()=>{const el=document.getElementById("v"+v);if(el){const y=el.getBoundingClientRect().top+window.scrollY-130;window.scrollTo({top:y});el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");}});}
+  else if(changed) window.scrollTo({top:0});
+}
+
+$("#view").addEventListener("click",e=>{
+  if(S.view!=="read")return;
+  const xb=e.target.closest(".xr"); if(xb){Panels.open("xref",{key:xb.dataset.xr});return;}
+  const w=e.target.closest(".w"); if(w){const row=w.closest(".v");document.querySelectorAll(".w.on").forEach(x=>x.classList.remove("on"));w.classList.add("on");openWord(S.b,S.c,+row.dataset.v,+w.dataset.wi);return;}
+  const nb=e.target.closest("[data-notes]"); if(nb){Panels.open("notes",{filter:nb.dataset.notes});return;}
+  const g=e.target.closest("[data-go]"); if(g){if(g.dataset.go){const [b,c]=g.dataset.go.split(".").map(Number);goTo(b,c);}return;}
+  if(e.target.closest("a"))return;
+  const row=e.target.closest(".v"); if(!row)return;
+  if(window.getSelection&&String(window.getSelection()).length>0)return;
+  const k=vkey(S.b,S.c,+row.dataset.v); if(S.sel.has(k))S.sel.delete(k);else S.sel.add(k); S.focusV={ch:S.b+"."+S.c,v:+row.dataset.v};
+  row.classList.toggle("sel",S.sel.has(k)); renderAct();
+});
+let tx=0,ty=0,tt=0;
+$("#view").addEventListener("touchstart",e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY;tt=Date.now();},{passive:true});
+$("#view").addEventListener("touchend",e=>{if(S.view!=="read")return;const t=e.changedTouches[0];const dx=t.clientX-tx,dy=t.clientY-ty;if(Date.now()-tt<600&&Math.abs(dx)>80&&Math.abs(dy)<45&&!e.target.closest(".il")){const p=dx<0?nextChap():prevChap();if(p)goTo(p[0],p[1]);}},{passive:true});
+document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select"))return;if(S.view==="read"){if(e.key==="ArrowLeft"){const p=prevChap();if(p)goTo(p[0],p[1]);}if(e.key==="ArrowRight"){const p=nextChap();if(p)goTo(p[0],p[1]);}}if(e.key==="Escape"){Panels.close();closeModal();}});
+
+/* ================= 選取工具列 ================= */
+function renderAct(){
+  const a=$("#act"); const n=S.sel.size;
+  if(!n||S.view!=="read"){a.classList.remove("show");return;}
+  const allBm=[...S.sel].every(k=>S.bm[k]);
+  a.innerHTML=`<span class="cnt">已選 ${n} 節</span>`+COLORS.map(([c,nm])=>`<button class="dot" style="background:var(--h-${c})" data-hl="${c}" title="${nm}色螢光筆"></button>`).join("")+
+  `<button class="dot none" data-hl="" title="清除螢光筆">${ICON.ban}</button><span class="sep"></span>`+
+  `<button class="ab" data-a="xref">${ICON.link}串珠</button><button class="ab" data-a="bm">${allBm?ICON.bmf:ICON.bm}書籤</button><button class="ab" data-a="note">${ICON.note}筆記</button><button class="ab" data-a="copy">${ICON.copy}複製</button><button class="ab" data-a="clear" title="取消選取">${ICON.x}</button>`;
+  a.classList.add("show");
+}
+$("#act").addEventListener("click",e=>{
+  const h=e.target.closest("[data-hl]");
+  if(h){const c=h.dataset.hl;S.sel.forEach(k=>{if(c)S.hl[k]=c;else delete S.hl[k];});S.hl={...S.hl};saveHL();S.sel.clear();renderReader();renderAct();return;}
+  const b=e.target.closest("[data-a]"); if(!b)return; const a=b.dataset.a;
+  if(a==="clear"){S.sel.clear();renderReader();renderAct();}
+  if(a==="bm"){const all=[...S.sel].every(k=>S.bm[k]);const now=Date.now();S.sel.forEach(k=>{if(all)delete S.bm[k];else if(!S.bm[k])S.bm[k]={t:now,tag:""};});S.bm={...S.bm};saveBM();toast(all?"已移除書籤":"已加入書籤");S.sel.clear();renderReader();renderAct();}
+  if(a==="note"){const keys=[...S.sel];S.sel.clear();renderReader();renderAct();Panels.open("notes",{newWith:keys});}
+  if(a==="copy"){copyText(selectionText([...S.sel]));S.sel.clear();renderReader();renderAct();}
+  if(a==="xref"){const keys=[...S.sel].sort((x,y)=>splitKey(x)[2]-splitKey(y)[2]);Panels.open("xref",{key:keys[0]});}
+});
+function selectionText(keys){
+  const groups=keysLabel(keys); const ents=primaryEntries().filter(e=>S.bibles[e.id]); let out=[];
+  groups.forEach(g=>{const rt=refText(g);out.push(S.settings.names==="en"?rt.en:rt.zh);ents.forEach(e=>{const lines=[];for(let v=g.v1;v<=g.v2;v++){const t=verseText(e.id,g.b,g.c,v);if(t)lines.push((g.v2>g.v1?v+" ":"")+t);}if(lines.length)out.push(lines.join(" ")+(ents.length>1?` (${e.short||e.name})`:""));});out.push("");});
+  return out.join("\n").trim();
+}
+
+/* ================= 原文字典 ================= */
+function strongParts(st){ // 回傳 [主字, 前後綴...]
+  if(!st)return {main:null,aff:[]};
+  const main=(st.match(/\{([GH]\d{4}[A-Za-z]?)\}/)||[])[1]; const all=st.match(/[GH]\d{4}[A-Za-z]?/g)||[];
+  return {main:main||all[0]||null,aff:all.filter(x=>x!==(main||all[0]))};
+}
+
+const POS={V:"動詞",N:"名詞",A:"形容詞",ADV:"副詞",CONJ:"連接詞",PREP:"介系詞",P:"代名詞",T:"冠詞",PRT:"語助詞",INJ:"感嘆詞",R:"代名詞",D:"指示代名詞",I:"疑問代名詞",X:"語助詞",Adv:"副詞",Conj:"連接詞",Prep:"介系詞",Prt:"語助詞",Pron:"代名詞",Intj:"感嘆詞",Ptcl:"語助詞",Ps1c:"人稱字尾",Art:"冠詞"};
+function posZh(code){if(!code)return "";const [lang,rest]=code.split(":");if(!rest)return code;if(lang==="N")return "專有名詞";const base=rest.split("-")[0];let z=POS[base]||POS[rest]||rest;if(base==="N"){if(/-M/.test(rest))z="陽性名詞";else if(/-F/.test(rest))z="陰性名詞";else if(/-N/.test(rest))z="中性名詞";}return z;}
+function morphZh(mo,lang){if(!mo||!S.morph)return "";if(lang==="grc")return S.morph[mo]||mo;const parts=mo.split("/");const L=parts[0][0];return parts.map((p,i)=>S.morph[i?L+p:p]||p).filter(Boolean).join("　＋　");}
+async function openWord(b,c,v,wi){
+  const lang=b>=40?"greek":"hebrew"; const OD=S.origData[b]; const w=((OD.ch[c-1]||[])[v-1]||[])[wi]; if(!w)return;
+  Panels.open("word",{b,c,v,wi,loading:true});
+  try{await loadLex(lang);}catch(e){setDrawer("原文字典",`<p class="hint">字典載入失敗，請檢查網路後再試。</p>`);return;}
+  if(Panels.cur==="word")renderWord(Panels.opts={b,c,v,wi});
+}
+function renderWord(o){
+  if(o.loading){setDrawer("原文字典",`<p class="hint">字典載入中…（第一次需要下載）</p>`);return;}
+  const {b,c,v,wi}=o; const lang=b>=40?"greek":"hebrew"; const he=b<40; const OD=S.origData[b]; const w=OD.ch[c-1][v-1][wi];
+  const {main,aff}=strongParts(w[3]); const E=lexGet(lang,main);
+  const occ=[]; if(main){const base=main.replace(/[A-Za-z]$/,"");OD.ch.forEach((C,ci)=>C.forEach((V,vi)=>{if(V.some(x=>{const m=strongParts(x[3]).main;return m&&m.replace(/[A-Za-z]$/,"")===base;}))occ.push([ci+1,vi+1]);}));}
+  const e0=primaryEntries().find(e=>S.bibles[e.id]);
+  const affH=aff.map(a=>{const A=lexGet(lang,a);return A?`<span class="tag" style="margin:2px">${esc(A[0])} ${esc(A[3])}</span>`:"";}).join("");
+  setDrawer(`原文字典`,`
+   <div class="lexhead"><div class="lm ${he?"he":"gr"}">${esc(E?E[0]:w[0])}</div><div class="tr">${esc(E?E[1]:w[1])}</div><div class="gl">${esc(E?E[3]:w[2])}</div></div>
+   <dl class="kv">
+    <dt>經文中的字</dt><dd><span style="font-family:${he?"var(--hfont)":"var(--gfont)"};font-size:22px">${esc(w[0])}</span>　<span class="muted">${esc(w[1])}</span></dd>
+    <dt>這裡譯作</dt><dd>${esc(w[2])}</dd>
+    <dt>Strong's</dt><dd>${esc(main||"—")}</dd>
+    <dt>詞性</dt><dd>${esc(E?posZh(E[2]):"")}</dd>
+    <dt>文法</dt><dd>${esc(morphZh(w[4],he?"hbo":"grc"))}</dd>
+    ${affH?`<dt>字首字尾</dt><dd>${affH}</dd>`:""}
+    <dt>出處</dt><dd>${esc(bname(b))} ${c}:${v}</dd>
+   </dl>
+   ${E&&E[4]?`<div class="sec" style="margin-top:16px"><h4>字典解釋（英文）</h4><div class="def">${E[4]}</div></div>`:""}
+   <div class="sec"><h4>這個字在${esc(bk(b).zh)}出現 ${occ.length} 節</h4><div class="list">${occ.slice(0,60).map(([cc,vv])=>`<div class="item" data-jump="${b}.${cc}.${vv}"><div class="ref">${esc(bname(b))} ${cc}:${vv}</div><div class="tx">${esc(e0?verseText(e0.id,b,cc,vv)||"":"")}</div></div>`).join("")}${occ.length>60?`<p class="hint">只列出前 60 節。</p>`:""}</div></div>
+   <p class="hint">原文與字典：STEPBible.org（Tyndale House, CC BY 4.0）</p>`);
+}
+
+/* ================= 串珠 ================= */
+async function renderXref(o){
+  const [b,c,v]=splitKey(o.key);
+  const back=(o.hist&&o.hist.length)?`<button class="ib" id="xrBack" title="上一個">${ICON.back}</button>`:"";
+  setDrawer(`${back}${ICON.link}串珠：${esc(bname(b))} ${c}:${v}`,`<p class="hint">載入中…</p>`);
+  if(back)$("#xrBack").onclick=()=>{const h=[...o.hist];const k=h.pop();Panels.open("xref",{key:k,hist:h});};
+  let X; try{X=await loadXref(b);}catch(e){$("#dbody").innerHTML=`<p class="hint">串珠資料載入失敗。</p>`;return;}
+  if(Panels.cur!=="xref")return;
+  const list=((X[c]||{})[v]||[]).map(decRef); const ents=primaryEntries().filter(e=>S.bibles[e.id]);
+  const e0=ents[0],e1=ents[1];
+  $("#dbody").innerHTML=`<div class="prev" style="cursor:default"><div class="ref">${esc(bname(b))} ${c}:${v}</div><div class="tx">${esc(e0?verseText(e0.id,b,c,v)||"":"")}</div></div>
+   <div class="sec" style="margin-top:14px"><h4>相關經文 ${list.length} 處</h4>${list.length?`<div class="list">${list.map(r=>`<div class="item" data-jump="${r.b}.${r.c}.${r.v}"><div class="ref">${esc(bname(r.b))} ${r.c}:${r.v} <span class="muted" style="font-weight:400;font-family:Georgia,serif">· ${esc(bk(r.b).en)} ${r.c}:${r.v}</span></div><div class="tx">${esc(e0?verseText(e0.id,r.b,r.c,r.v)||"":"")}</div>${e1?`<div class="tx2">${esc(verseText(e1.id,r.b,r.c,r.v)||"")}</div>`:""}<div style="margin-top:6px"><button class="btn ghost sm" data-xrnext="${r.b}.${r.c}.${r.v}">${ICON.link}看這節的串珠</button></div></div>`).join("")}</div>`:`<p class="hint">這節沒有串珠資料。</p>`}</div>
+   <p class="hint">點經文會跳過去；按「看這節的串珠」可以一路追下去，左上角箭頭回上一個。<br>串珠資料：Treasury of Scripture Knowledge（經 MetaV 整理）</p>`;
+  $("#dbody").querySelectorAll("[data-xrnext]").forEach(bn=>bn.onclick=e=>{e.stopPropagation();Panels.open("xref",{key:bn.dataset.xrnext,hist:[...(o.hist||[]),o.key]});});
+}
+
+function applyTheme(){
+  const s=S.settings; document.body.classList.toggle("dark",s.theme==="dark");document.body.classList.toggle("sepia",s.theme==="sepia");document.body.classList.toggle("sans",s.font==="sans");
+  document.documentElement.style.setProperty("--fs",s.fontSize+"px");document.documentElement.style.setProperty("--lh",s.lineHeight);
+}
+function lexGet(lang,key){const L=S.lex[lang];if(!L||!key)return null;if(L[key])return L[key];const base=key.replace(/[A-Za-z]$/,"");if(L[base])return L[base];for(const s of "ABCDEFGHIJ"){if(L[base+s])return L[base+s];}return null;}
+
+/* ================= 側邊面板 ================= */
+const Panels={cur:null,opts:{},
+  open(name,opts={}){this.cur=name;this.opts=opts;$("#drawer").classList.add("show");$("#scrim").classList.add("show");this.render();
+    document.querySelectorAll("[data-panel]").forEach(b=>b.classList.toggle("on",b.dataset.panel===name));},
+  close(){hidePop();if(this.cur==="notes"){NoteEd.flushNow();NoteEd.mode=null;}this.cur=null;$("#drawer").classList.remove("show");$("#scrim").classList.remove("show");document.querySelectorAll("[data-panel]").forEach(b=>b.classList.remove("on"));},
+  render(){const f={books:renderBooks,search:renderSearch,notes:renderNotes,marks:renderMarks,settings:renderSettings,word:renderWord,xref:renderXref}[this.cur];if(f)f(this.opts);},
+  refresh(){if(this.cur==="marks"||this.cur==="settings")this.render();if(this.cur==="notes"&&!NoteEd.id)this.render();}
+};
+$("#dclose").onclick=()=>Panels.close(); $("#scrim").onclick=()=>Panels.close();
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
+function setDrawer(title,body){$("#dtitle").innerHTML=title;$("#dbody").innerHTML=body;}
+
+/* --- 選書卷 --- */
+function renderBooks(o){
+  if(o.book&&o.chap){
+    const b=o.book,c=o.chap,n=verseCount(b,c)||0;
+    setDrawer(`<button class="ib" id="bkBack" title="選章">${ICON.back}</button>${esc(bname(b))} ${c} · 選節`,`<div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="muted" style="font-family:Georgia,serif">${esc(bk(b).en)} ${c}</span><button class="btn ghost sm" id="bkChap">${ICON.toc}換章</button></div><div class="cgrid">${Array.from({length:n},(_,i)=>`<button data-v="${i+1}">${i+1}</button>`).join("")}</div>`);
+    $("#bkBack").onclick=()=>Panels.open("books",{book:b});$("#bkChap").onclick=()=>Panels.open("books",{book:b});
+    $("#dbody").onclick=e=>{const x=e.target.closest("[data-v]");if(x){Panels.close();goTo(b,c,+x.dataset.v);}};
+    return;
+  }
+  if(o.book){
+    const b=o.book,n=chapterCount(b);
+    setDrawer(`<button class="ib" id="bkBack" title="換書卷">${ICON.back}</button>${esc(bname(b))} · 選章`,`<div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="muted" style="font-family:Georgia,serif">${esc(bk(b).en)}</span><button class="btn ghost sm" id="bkAll">${ICON.toc}換其他書卷</button></div><div class="cgrid">${Array.from({length:n},(_,i)=>`<button class="${b===S.b&&i+1===S.c?"on":""}" data-c="${i+1}">${i+1}</button>`).join("")}</div>`);
+    $("#bkBack").onclick=()=>Panels.open("books");$("#bkAll").onclick=()=>Panels.open("books");
+    $("#dbody").onclick=e=>{const c=e.target.closest("[data-c]");if(c){goTo(b,+c.dataset.c);Panels.close();}};
+    return;
+  }
+  const grid=arr=>`<div class="bgrid">${arr.map(B=>`<button class="${B.n===S.b?"on":""}" data-b="${B.n}">${S.settings.names==="en"?esc(B.en):esc(B.zh)}${S.settings.names==="en"?"":`<small>${esc(B.en)}</small>`}</button>`).join("")}</div>`;
+  setDrawer("選擇書卷",`<div class="sec"><div class="row"><input id="refIn" placeholder="直接輸入，例如 約3:16、詩23篇" enterkeyhint="go"><button class="btn" id="refGo">前往</button></div></div>
+    <div class="sec"><h4>舊約</h4>${grid(BOOKS.slice(0,39))}</div><div class="sec"><h4>新約</h4>${grid(BOOKS.slice(39))}</div>`);
+  const go=()=>{const r=parseRefs($("#refIn").value)[0];if(!r){toast("看不懂這個經文，試試「約3:16」");return;}goTo(r.b,r.c,r.whole?null:r.v1);Panels.close();};
+  $("#refGo").onclick=go; $("#refIn").onkeydown=e=>{if(e.key==="Enter")go();};
+  $("#dbody").onclick=e=>{const b=e.target.closest("[data-b]");if(b){const n=+b.dataset.b;if(chapterCount(n)===1){goTo(n,1);Panels.close();}else Panels.open("books",{book:n});}};
+}
+
+/* --- 搜尋 --- */
+let lastSearch={q:"",scope:"all",bib:null};
+function renderSearch(){
+  const bibs=allBibles();
+  if(!bibs.length){setDrawer("搜尋",`<p class="hint">請先到「設定」匯入譯本。</p>`);return;}
+  const bib=lastSearch.bib&&bibs.find(b=>b.id===lastSearch.bib)?lastSearch.bib:(shownEntries()[0]||bibs[0]).id;
+  setDrawer("搜尋",`<div class="sec"><div class="row"><input id="sq" placeholder="關鍵字，或 約3:16" value="${esc(lastSearch.q)}" enterkeyhint="search"><button class="btn" id="sgo">搜尋</button></div>
+   <div class="row" style="margin-top:8px"><select id="sbib" style="flex:1">${bibs.map(b=>`<option value="${b.id}" ${b.id===bib?"selected":""}>${esc(b.name)}</option>`).join("")}</select>
+   <select id="sscope" style="flex:1"><option value="all">全部</option><option value="ot">舊約</option><option value="nt">新約</option><option value="book">只搜 ${esc(bk(S.b).zh)}</option></select></div>
+   <p class="hint" style="margin:8px 2px 0">多個關鍵字用空白隔開，會找同時有這些字的經文。</p></div><div id="sres"></div>`);
+  $("#sscope").value=lastSearch.scope;
+  const run=()=>doSearch($("#sq").value.trim(),$("#sbib").value,$("#sscope").value);
+  $("#sgo").onclick=run; $("#sq").onkeydown=e=>{if(e.key==="Enter")run();};
+  if(lastSearch.q)run(); else setTimeout(()=>$("#sq").focus(),250);
+}
+async function doSearch(q,bibId,scope){
+  lastSearch={q,scope,bib:bibId}; const res=$("#sres"); if(!q){res.innerHTML="";return;}
+  const entry=allBibles().find(b=>b.id===bibId); if(!S.bibles[bibId]){res.innerHTML=`<p class="hint">正在載入譯本…</p>`;await loadBible(entry);if(!S.bibles[bibId]){res.innerHTML=`<p class="hint">這個譯本無法載入。</p>`;return;}}
+  let h=""; const refs=parseRefs(q);
+  if(refs.length){h+=`<div class="sec"><h4>前往經文</h4><div class="list">${refs.slice(0,5).map(r=>`<div class="item" data-jump="${r.b}.${r.c}.${r.whole?0:r.v1}"><div class="ref">${esc(refLabel(r))}</div>${r.whole?"":`<div class="tx">${esc(verseText(bibId,r.b,r.c,r.v1)||"")}</div>`}</div>`).join("")}</div></div>`;}
+  const onlyRef = refs.length && q.replace(REF_RE,"").trim()==="";
+  if(!onlyRef){
+    const terms=q.toLowerCase().split(/\s+/).filter(Boolean); const B=S.bibles[bibId].books; const hits=[]; let total=0;
+    const [b0,b1]=scope==="ot"?[1,39]:scope==="nt"?[40,66]:scope==="book"?[S.b,S.b]:[1,66];
+    for(let b=b0;b<=b1;b++){const bb=B[b-1]||[];for(let c=0;c<bb.length;c++){const ch=bb[c]||[];for(let v=0;v<ch.length;v++){const t=ch[v];if(!t)continue;const lt=t.toLowerCase();if(terms.every(x=>lt.includes(x))){total++;if(hits.length<300)hits.push([b,c+1,v+1,t]);}}}}
+    const re=new RegExp(terms.map(escRe).join("|"),"gi");
+    h+=`<div class="sec"><h4>找到 ${total} 節${total>300?"（顯示前 300 節）":""}</h4><div class="list">${hits.map(([b,c,v,t])=>`<div class="item" data-jump="${b}.${c}.${v}"><div class="ref">${esc(bk(b).zh)} ${c}:${v}</div><div class="tx">${esc(t).replace(re,m=>`<mark>${m}</mark>`)}</div></div>`).join("")}</div></div>`;
+  }
+  res.innerHTML=h;
+}
+$("#dbody").addEventListener("click",e=>{const j=e.target.closest("[data-jump]");if(!j)return;const [b,c,v]=j.dataset.jump.split(".").map(Number);goTo(b,c,v||null);});
+
+/* --- 筆記 --- */
+const NoteEd={id:null,dirty:false,isNew:false,
+  saveSoon:debounce(()=>NoteEd.flushNow(),900),
+  flushNow(){if(!this.id||!this.dirty)return;const n=this.obj||S.notes.get(this.id);if(!n)return;S.notes.set(this.id,n);
+    if(this.isNew&&!n.title&&!n.body&&!(n.anchors||[]).length){this.dirty=false;return;}
+    this.isNew=false;n.updated=Date.now();Store.write(this.id,{...n});this.dirty=false;const st=$("#nstatus");if(st)st.textContent="已儲存 ✓";rebuildNoteIndex();renderReader();}
+};
+function newNoteId(){return "note-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function renderNotes(o){
+  if(o.edit||o.newWith){ if(o.newWith){const id=newNoteId();S.notes.set(id,{title:"",body:"",anchors:o.newWith,created:Date.now(),updated:Date.now()});NoteEd.isNew=true;NoteEd.dirty=false;Panels.opts={edit:id};return renderNoteEditor(id);} return renderNoteEditor(o.edit); }
+  NoteEd.id=null;
+  const filter=o.filter; const q=(o.q||"").toLowerCase();
+  let list=[...S.notes.entries()];
+  if(filter){const ids=S.noteIndex.get(filter)||new Set();list=list.filter(([id])=>ids.has(id));}
+  if(q)list=list.filter(([,n])=>((n.title||"")+(n.body||"")).toLowerCase().includes(q));
+  list.sort((a,b)=>(b[1].updated||0)-(a[1].updated||0));
+  const fk=filter?splitKey(filter):null;
+  setDrawer("我的筆記",`<div class="sec"><div class="row"><input id="nq" placeholder="搜尋筆記" value="${esc(o.q||"")}"><button class="btn" id="nnew">${ICON.plus}新增</button></div>
+    ${filter?`<div style="margin-top:10px"><span class="tag">只看 ${esc(refLabel({b:fk[0],c:fk[1],v1:fk[2],v2:fk[2]}))} 的筆記 <button id="nunf">${ICON.x}</button></span></div>`:""}
+    <p class="hint" style="margin:8px 2px 0">筆記裡寫到的經文（例如「約3:16」「羅8:28-30」）會自動顯示經文內容，並在那節經文旁出現筆記記號。</p></div>
+    <div class="list">${list.length?list.map(([id,n])=>{const refs=[...keysLabel(n.anchors||[]).map(g=>refLabel(g,true)),...parseRefs(n.body).slice(0,3).map(r=>refLabel(r,true))];const first=(n.body||"").split("\n").find(x=>x.trim())||"";
+      return `<div class="item" data-nid="${id}"><div style="font-weight:700">${esc(n.title||first.slice(0,30)||"（未命名筆記）")}</div>${n.title&&first?`<div class="meta" style="color:var(--fg)">${esc(first.slice(0,60))}</div>`:""}<div class="meta">${fmtDate(n.updated||n.created)}${refs.length?" · "+esc([...new Set(refs)].slice(0,4).join("、")):""}</div></div>`;}).join(""):`<p class="hint">${filter?"這節經文還沒有筆記。":"還沒有筆記。"}</p>`}</div>`);
+  const qi=$("#nq"); qi.oninput=debounce(()=>{Panels.opts={...Panels.opts,q:qi.value};const pos=qi.selectionStart;renderNotes(Panels.opts);const n=$("#nq");n.focus();n.setSelectionRange(pos,pos);},300);
+  $("#nnew").onclick=()=>Panels.open("notes",{newWith:filter?[filter]:[]});
+  if(filter)$("#nunf").onclick=()=>Panels.open("notes",{});
+  $("#dbody").querySelectorAll("[data-nid]").forEach(el=>el.onclick=()=>Panels.open("notes",{edit:el.dataset.nid,back:o}));
+}
+function linkify(text){
+  let out="",last=0,m; const re=new RegExp(REF_RE.source,"gi");
+  while((m=re.exec(text))){
+    const segs=parseRefs(m[0]); if(!segs.length) continue;
+    out+=esc(text.slice(last,m.index))+`<a class="vref" data-refs="${segs.map(r=>[r.b,r.c,r.v1,r.v2,r.whole?1:0].join(".")).join(";")}">${esc(m[0])}</a>`;
+    last=m.index+m[0].length;
+  }
+  return out+esc(text.slice(last));
+}
+function renderNoteEditor(id){
+  let n=S.notes.get(id); if(!n){Panels.open("notes",{});return;}
+  if(Object.isFrozen(n)||Object.isFrozen(n.anchors||[])){n={...n,anchors:[...(n.anchors||[])]};S.notes.set(id,n);}
+  NoteEd.id=id; NoteEd.obj=n;
+  if(!NoteEd.mode||NoteEd.modeFor!==id){NoteEd.mode=(n.body||n.title)?"read":"edit";NoteEd.modeFor=id;}
+  const editing=NoteEd.mode==="edit";
+  const head=`<button class="ib" id="nback" title="回筆記列表">${ICON.back}</button>筆記<span class="row" style="margin-left:auto;gap:10px"><span class="status" id="nstatus">${n.updated?"上次修改 "+fmtDate(n.updated):""}</span>${editing?`<button class="btn sm" id="ndone">${ICON.check}儲存完成</button>`:`<button class="btn sm" id="nedit">${ICON.pen}編輯</button>`}</span>`;
+  const foot=`<div class="row" style="justify-content:flex-end;margin-top:10px"><span class="row"><button class="btn ghost sm" id="ncopy">${ICON.copy}複製</button><button class="btn danger sm" id="ndel">${ICON.trash}刪除</button></span></div>`;
+  if(NoteEd.mode==="read"){
+    setDrawer(head,`<div id="nanch" style="margin:0 0 10px"></div>
+      <div class="nview" id="nview">${n.title?`<h2>${linkify(n.title)}</h2>`:""}${n.body?linkify(n.body):'<span class="muted">（空白筆記）</span>'}</div>
+      <p class="hint" style="margin:8px 2px 0">底線的經文可以點，會跳出經文內容。</p>${foot}`);
+    $("#nedit").onclick=()=>{NoteEd.mode="edit";renderNoteEditor(id);setTimeout(()=>{const b=$("#nbody");if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length);}},200);};
+    $("#nview").onclick=e=>{const a=e.target.closest("a.vref");if(a)showVersePop(a.dataset.refs,a);};
+  } else {
+    const cnt=()=>{const k=parseRefs((n.title||"")+"\n"+(n.body||"")).length;return k?`偵測到 ${k} 處經文，按「儲存完成」後就能點選。`:"寫到經文，例如「約3:16」「羅8:28-30」「詩23篇」，完成後會變成可以點的連結。";};
+    setDrawer(head,`<input id="ntitle" placeholder="標題（可不填）" value="${esc(n.title||"")}">
+      <div id="nanch" style="margin:10px 0"></div>
+      <textarea id="nbody" placeholder="在這裡寫筆記，或直接貼上…">${esc(n.body||"")}</textarea>
+      <p class="hint" id="nhint" style="margin:6px 2px 0">${cnt()}</p>${foot}`);
+    const body=$("#nbody"),title=$("#ntitle");
+    const grow=()=>{body.style.height="auto";body.style.height=Math.max(260,body.scrollHeight+4)+"px";}; grow();
+    const updHint=debounce(()=>{const h=$("#nhint");if(h)h.textContent=cnt();},400);
+    const changed=()=>{n.title=title.value;n.body=body.value;NoteEd.dirty=true;$("#nstatus").textContent="儲存中…";NoteEd.saveSoon();updHint();};
+    title.oninput=changed; body.oninput=()=>{grow();changed();};
+    $("#ndone").onclick=()=>{n.title=title.value;n.body=body.value;NoteEd.dirty=true;NoteEd.flushNow();NoteEd.mode="read";renderNoteEditor(id);toast("筆記已儲存");};
+    if(!n.body&&!n.title)setTimeout(()=>body.focus(),250);
+  }
+  renderAnchors(n);
+  $("#nback").onclick=()=>{NoteEd.flushNow();NoteEd.id=null;NoteEd.mode=null;Panels.open("notes",{});};
+  $("#ndel").onclick=async()=>{if(!await ask("確定刪除這則筆記？","刪除",true))return;S.notes.delete(id);NoteEd.id=null;NoteEd.dirty=false;NoteEd.mode=null;if(!NoteEd.isNew)Store.write(id,null);NoteEd.isNew=false;rebuildNoteIndex();renderReader();Panels.open("notes",{});toast("已刪除");};
+  $("#ncopy").onclick=()=>copyText(noteAsText(n));
+}
+/* ---- 經文小視窗 ---- */
+function showVersePop(refsStr,el){
+  const segs=refsStr.split(";").map(x=>{const [b,c,v1,v2,w]=x.split(".").map(Number);return {b,c,v1,v2,whole:!!w};});
+  const ents=primaryEntries().filter(e=>S.bibles[e.id]); const P=$("#pop");
+  document.querySelectorAll("a.vref.on").forEach(a=>a.classList.remove("on")); if(el)el.classList.add("on");
+  let h="";
+  segs.forEach(r=>{const n=verseCount(r.b,r.c);const v2=Math.min(r.v2,n||r.v2);const cap=Math.min(v2,r.v1+29);const rt=refText({...r,v2});
+    h+=`<div style="margin-bottom:8px"><div class="pref">${esc(rt.zh)}<span>${esc(rt.en)}</span></div>`;
+    ents.forEach((e,i)=>{const parts=[];for(let v=r.v1;v<=cap;v++){const t=verseText(e.id,r.b,r.c,v);if(t)parts.push(`${cap>r.v1?`<sup>${v}</sup>`:""}${esc(t)}`);}
+      if(parts.length)h+=`<div class="${i?"ptx2":"ptx"}">${parts.join(" ")}${cap<v2?" …":""}</div>`;});
+    if(!ents.length)h+=`<div class="hint">經文載入中…</div>`;
+    h+=`</div>`;});
+  const r0=segs[0];
+  h+=`<div class="pacts"><button class="btn ghost sm" id="popCopy">${ICON.copy}複製</button><button class="btn sm" id="popGo">${ICON.go}前往經文</button><button class="ib" id="popX" title="關閉" style="width:36px;height:36px">${ICON.x}</button></div>`;
+  P.innerHTML=h; P.classList.add("show");
+  if(el&&window.innerWidth>600){const rc=el.getBoundingClientRect();const w=P.offsetWidth,ph=P.offsetHeight;let left=Math.min(Math.max(8,rc.left),window.innerWidth-w-8);let top=rc.bottom+8;if(top+ph>window.innerHeight-8)top=Math.max(8,rc.top-ph-8);P.style.left=left+"px";P.style.top=top+"px";}
+  $("#popX").onclick=hidePop;
+  $("#popCopy").onclick=()=>{const keys=[];segs.forEach(r=>{const n=verseCount(r.b,r.c);for(let v=r.v1;v<=Math.min(r.v2,n);v++)keys.push(vkey(r.b,r.c,v));});copyText(selectionText(keys));};
+  $("#popGo").onclick=()=>{hidePop();if(window.innerWidth<1000)Panels.close();goTo(r0.b,r0.c,r0.whole?null:r0.v1);};
+}
+function hidePop(){$("#pop").classList.remove("show");document.querySelectorAll("a.vref.on").forEach(a=>a.classList.remove("on"));}
+document.addEventListener("pointerdown",e=>{const P=$("#pop");if(P.classList.contains("show")&&!P.contains(e.target)&&!e.target.closest("a.vref,[data-popref]"))hidePop();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hidePop();});
+function renderAnchors(n){
+  const el=$("#nanch"); const groups=keysLabel(n.anchors||[]);
+  el.innerHTML=groups.length?`<span class="small muted">綁定經文：</span> `+groups.map(g=>`<span class="tag" style="margin:2px"><a class="vref" data-popref="1" data-refs="${g.b}.${g.c}.${g.v1}.${g.v2}.0" style="text-decoration:none">${esc(refLabel(g))}</a> <button data-unanchor="${g.b}.${g.c}.${g.v1}.${g.v2}" title="取消綁定">${ICON.x}</button></span>`).join(""):"";
+  el.onclick=e=>{const a=e.target.closest("a.vref");if(a){showVersePop(a.dataset.refs,a);return;}const u=e.target.closest("[data-unanchor]");if(!u)return;const [b,c,v1,v2]=u.dataset.unanchor.split(".").map(Number);n.anchors=(n.anchors||[]).filter(k=>{const [kb,kc,kv]=splitKey(k);return !(kb===b&&kc===c&&kv>=v1&&kv<=v2);});NoteEd.dirty=true;NoteEd.saveSoon();renderAnchors(n);};
+}
+function refBlock(r){
+  const ents=primaryEntries(); const e1=ents[0],e2=ents[1];
+  const n=verseCountFor(r.b,r.c); const v2=Math.min(r.v2,n||r.v2); const cap=Math.min(v2,r.v1+29);
+  const line=(e)=>{if(!e||!S.bibles[e.id])return "";const parts=[];for(let v=r.v1;v<=cap;v++){const t=verseText(e.id,r.b,r.c,v);if(t)parts.push(`${cap>r.v1?`<sup>${v}</sup>`:""}${esc(t)}`);}return parts.join(" ");};
+  const t1=line(e1),t2=line(e2);
+  return `<div class="prev" data-jump="${r.b}.${r.c}.${r.whole?0:r.v1}"><div class="ref">${esc(refLabel(r))}</div>${t1?`<div class="tx">${t1}${cap<v2?" …":""}</div>`:`<div class="tx muted">（經文載入中或此譯本沒有）</div>`}${t2?`<div class="tx2">${t2}${cap<v2?" …":""}</div>`:""}</div>`;
+}
+function verseCountFor(b,c){return verseCount(b,c);}
+function renderNotePreview(n){
+  const el=$("#nprev"); if(!el)return;
+  const anchorRefs=keysLabel(n.anchors||[]); const textRefs=parseRefs((n.title||"")+"\n"+(n.body||""));
+  const seen=new Set(); const all=[...anchorRefs,...textRefs].filter(r=>{const k=`${r.b}.${r.c}.${r.v1}.${r.v2}`;if(seen.has(k))return false;seen.add(k);return true;});
+  el.innerHTML=all.length?all.slice(0,40).map(refBlock).join(""):`<p class="hint">還沒有寫到經文。</p>`;
+}
+function noteAsText(n){
+  const refs=[...keysLabel(n.anchors||[]),...parseRefs(n.body)]; const ents=primaryEntries().filter(e=>S.bibles[e.id]);
+  let out=(n.title?n.title+"\n\n":"")+(n.body||"");
+  if(refs.length&&ents[0]){out+="\n\n— 經文 —";const seen=new Set();refs.forEach(r=>{const lab=refLabel(r);if(seen.has(lab)||r.whole)return;seen.add(lab);const t=[];for(let v=r.v1;v<=Math.min(r.v2,r.v1+29);v++){const x=verseText(ents[0].id,r.b,r.c,v);if(x)t.push(x);}out+=`\n${lab} ${t.join(" ")}`;});}
+  return out;
+}
+
+/* --- 書籤與螢光筆 --- */
+function renderMarks(o){
+  const tab=o.tab||"bm"; const e0=primaryEntries().find(e=>S.bibles[e.id]);
+  const vt=k=>{const [b,c,v]=splitKey(k);return e0?verseText(e0.id,b,c,v)||"":"";};
+  const lab=k=>{const [b,c,v]=splitKey(k);return `${bk(b).zh} ${c}:${v}`;};
+  const ord=(a,b)=>{const x=splitKey(a),y=splitKey(b);return x[0]-y[0]||x[1]-y[1]||x[2]-y[2];};
+  let body=`<div class="tabs"><div class="seg"><button class="${tab==="bm"?"on":""}" data-tab="bm">書籤 ${Object.keys(S.bm).length}</button><button class="${tab==="hl"?"on":""}" data-tab="hl">螢光筆 ${Object.keys(S.hl).length}</button></div></div>`;
+  if(tab==="bm"){
+    const tags=[...new Set(Object.values(S.bm).map(x=>x.tag).filter(Boolean))]; const tf=o.tag||"";
+    if(tags.length)body+=`<div class="row" style="flex-wrap:wrap;margin-bottom:10px"><button class="chip ${!tf?"on":""}" data-tag="">全部</button>${tags.map(t=>`<button class="chip ${tf===t?"on":""}" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>`;
+    let keys=Object.keys(S.bm).filter(k=>!tf||S.bm[k].tag===tf).sort((a,b)=>(S.bm[b].t||0)-(S.bm[a].t||0));
+    body+=keys.length?`<div class="list">${keys.map(k=>`<div class="item" data-jump="${k}"><div class="row" style="justify-content:space-between"><span class="ref">${esc(lab(k))}</span><button class="ib" data-unbm="${k}" title="移除書籤" style="width:34px;height:34px">${ICON.trash}</button></div><div class="tx">${esc(vt(k))}</div><input class="small" data-tagfor="${k}" placeholder="加分類標籤，例如：背誦、應許" value="${esc(S.bm[k].tag||"")}" style="margin-top:8px;padding:6px 10px;font-size:15px"></div>`).join("")}</div>`:`<p class="hint">還沒有書籤。點選經文後按「書籤」就會加入。</p>`;
+  } else {
+    const cf=o.color||"";
+    body+=`<div class="row" style="flex-wrap:wrap;margin-bottom:10px"><button class="chip ${!cf?"on":""}" data-color="">全部</button>${COLORS.map(([c,nm])=>`<button class="chip ${cf===c?"on":""}" data-color="${c}"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--h-${c});margin-right:5px;vertical-align:-1px;box-shadow:0 0 0 1px var(--line)"></span>${nm}</button>`).join("")}</div>`;
+    const keys=Object.keys(S.hl).filter(k=>!cf||S.hl[k]===cf).sort(ord);
+    body+=keys.length?`<div class="list">${keys.map(k=>`<div class="item" data-jump="${k}" style="border-left:6px solid var(--h-${S.hl[k]})"><div class="ref">${esc(lab(k))}</div><div class="tx">${esc(vt(k))}</div></div>`).join("")}</div>`:`<p class="hint">還沒有螢光筆標記。點選經文後選顏色就可以。</p>`;
+  }
+  setDrawer("書籤與螢光筆",body);
+  const D=$("#dbody");
+  D.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>Panels.open("marks",{tab:b.dataset.tab}));
+  D.querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>Panels.open("marks",{tab:"bm",tag:b.dataset.tag}));
+  D.querySelectorAll("[data-color]").forEach(b=>b.onclick=()=>Panels.open("marks",{tab:"hl",color:b.dataset.color}));
+  D.querySelectorAll("[data-unbm]").forEach(b=>b.onclick=e=>{e.stopPropagation();delete S.bm[b.dataset.unbm];S.bm={...S.bm};saveBM();renderReader();renderMarks(o);});
+  D.querySelectorAll("[data-tagfor]").forEach(inp=>{inp.onclick=e=>e.stopPropagation();inp.onchange=()=>{const k=inp.dataset.tagfor;if(S.bm[k]){S.bm[k]={...S.bm[k],tag:inp.value.trim()};S.bm={...S.bm};saveBM();}};});
+}
+
+/* --- 設定 --- */
+function renderSettings(){
+  const s=S.settings;
+  setDrawer("設定",`
+  <div class="sec"><h4>字體大小 <span id="fsv">${s.fontSize}</span></h4><input type="range" min="16" max="36" step="1" value="${s.fontSize}" id="fs"></div>
+  <div class="sec"><h4>行距 <span id="lhv">${s.lineHeight}</span></h4><input type="range" min="1.4" max="2.6" step="0.05" value="${s.lineHeight}" id="lh"></div>
+  <div class="sec"><h4>字型</h4><div class="seg"><button data-font="serif" class="${s.font==="serif"?"on":""}" style="font-family:'Noto Serif TC',serif">明體</button><button data-font="sans" class="${s.font==="sans"?"on":""}">黑體</button></div></div>
+  <div class="sec"><h4>對照版面</h4><div class="seg"><button data-lay="cols" class="${s.layout!=="inter"?"on":""}">左右並排</button><button data-lay="inter" class="${s.layout==="inter"?"on":""}">上下交錯</button></div></div>
+  <div class="sec"><h4>書卷名稱</h4><div class="seg"><button data-nm="both" class="${(s.names||"both")==="both"?"on":""}">中英</button><button data-nm="zh" class="${s.names==="zh"?"on":""}">中文</button><button data-nm="en" class="${s.names==="en"?"on":""}">English</button></div></div>
+  <div class="sec"><h4>背景</h4><div class="seg"><button data-theme="light" class="${s.theme==="light"?"on":""}">淺色</button><button data-theme="sepia" class="${s.theme==="sepia"?"on":""}">米色</button><button data-theme="dark" class="${s.theme==="dark"?"on":""}">深色</button></div></div>
+  <div class="sec"><h4>譯本</h4><div class="list" id="biblist">${allBibles().map((e,i)=>`<div class="bib"><div class="nm"><b>${esc(e.name)}</b><span>${esc(e.short||"")} · ${e.lang==="en"?"英文":e.lang==="zh"?"中文":esc(e.lang||"")} · ${(e.count||0).toLocaleString()} 節${e.builtin?" · 內建":e.assetId?"":" · 只在匯入的那台裝置"}</span></div>
+     ${i>0?`<button class="ib" data-mvup="${e.id}" title="往前移">${ICON.up}</button>`:""}${e.builtin?"":`<button class="ib" data-delbib="${e.id}" title="刪除">${ICON.trash}</button>`}</div>`).join("")||`<p class="hint">還沒有譯本。</p>`}</div>
+     <p style="margin-top:10px"><button class="btn" data-import="1">${ICON.plus}匯入譯本檔案</button></p>
+     <p class="hint">和合本、KJV 已內建。想加別的譯本，可以匯入常見的聖經 JSON 檔，或每行「書卷 章:節 經文」的文字檔（只能用公版或你有權使用的譯本）。排在前面的譯本，對照時在左邊。</p></div>
+  <div class="sec"><h4>同步（iPad、iPhone、電腦共用筆記）</h4>
+    <div class="card" style="padding:14px 16px"><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><b id="syState">${esc(S.syncText||"")}</b>${SY.token?`<button class="btn sm" id="syNow">立即同步</button>`:""}</div>
+    ${SY.token?`<p class="hint" style="margin:8px 0 0">已設定同步。筆記、書籤、螢光筆、讀經進度會自動同步到你 GitHub 裡的私人資料（只有你看得到）。沒有網路時會先存在這台裝置，連上網路再自動補傳。</p><p style="margin:10px 0 0"><button class="btn ghost sm" id="syClear">取消這台裝置的同步</button></p>`
+    :`<p class="hint" style="margin:8px 0">還沒設定。每台裝置貼一次「同步密碼」就好：</p>
+      <ol class="hint" style="margin:0 0 10px;padding-left:22px"><li>打開 <a href="https://github.com/settings/tokens/new?scopes=gist&description=my-bible-sync" target="_blank" rel="noopener">建立同步密碼</a>（要先登入 GitHub）</li><li>Expiration 選 <b>No expiration</b>，其他不用改，按最下面綠色的 <b>Generate token</b></li><li>複製出現的那串 <b>ghp_</b> 開頭的密碼，貼到下面</li></ol>
+      <div class="row"><input id="syTok" type="password" placeholder="貼上 ghp_ 開頭的同步密碼" autocomplete="off"><button class="btn" id="sySave">儲存</button></div>`}</div></div>
+  <div class="sec"><h4>離線使用</h4><p class="hint">和合本、KJV 讀過一次就會存在這台裝置。原文、字典、串珠平常是讀到才下載；出門前可以一次全部下載（約 40 MB），沒有網路也能用。</p>
+    <button class="btn ghost sm" id="dlAll">${ICON.go}全部下載供離線使用</button> <span class="hint" id="dlProg">${LS.get("mybible.allDownloaded")?"已全部下載過 ✓":""}</span></div>
+  <div class="sec"><h4>從 Claude 舊版搬資料</h4><p class="hint">在舊版（Claude 裡的我的聖經）→ 設定 →「搬到離線版」複製資料，再貼到這裡。只要做一次。</p>
+    <textarea id="oldData" style="min-height:70px" placeholder="貼上舊版複製的資料"></textarea><p style="margin:8px 0 0"><button class="btn ghost sm" id="oldImp">匯入</button></p></div>
+  <div class="sec"><h4>備份</h4><button class="btn ghost sm" id="expNotes">${ICON.copy}複製全部筆記</button></div>
+  <div class="sec"><h4>資料來源</h4><p class="hint">和合本（1919，公版）、King James Version（公版）：midvash/bible-data<br>希臘文、希伯來文原文與字典：STEPBible.org，Tyndale House，CC BY 4.0<br>串珠：Treasury of Scripture Knowledge（MetaV 整理）</p><p class="hint">版本：離線版 2026.11.13</p></div>`);
+  const D=$("#dbody");
+  const fs=$("#fs"),lh=$("#lh");
+  fs.oninput=()=>{s.fontSize=+fs.value;$("#fsv").textContent=fs.value;applyTheme();};fs.onchange=saveSettings;
+  lh.oninput=()=>{s.lineHeight=+lh.value;$("#lhv").textContent=lh.value;applyTheme();};lh.onchange=saveSettings;
+  D.querySelectorAll("[data-font]").forEach(b=>b.onclick=()=>{s.font=b.dataset.font;applyTheme();saveSettings();renderSettings();});
+  D.querySelectorAll("[data-lay]").forEach(b=>b.onclick=()=>{s.layout=b.dataset.lay;saveSettings();renderAll();renderSettings();});
+  D.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{s.names=b.dataset.nm;saveSettings();renderAll();renderSettings();});
+  D.querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>{s.theme=b.dataset.theme;applyTheme();saveSettings();renderSettings();});
+  D.querySelectorAll("[data-import]").forEach(b=>b.onclick=startImport);
+  D.querySelectorAll("[data-mvup]").forEach(b=>b.onclick=()=>{const arr=allBibles();const i=arr.findIndex(x=>x.id===b.dataset.mvup);if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];s.order=arr.map(x=>x.id);s.shown=arr.map(x=>x.id).filter(x=>s.shown.includes(x));saveSettings();renderAll();renderSettings();}});
+  D.querySelectorAll("[data-delbib]").forEach(b=>b.onclick=async()=>{const e=s.bibles.find(x=>x.id===b.dataset.delbib);if(!e)return;if(!await ask(`確定刪除譯本「${e.name}」？（筆記、書籤不會被刪除）`,"刪除",true))return;
+    s.bibles=s.bibles.filter(x=>x.id!==e.id);s.shown=s.shown.filter(x=>x!==e.id);if(!s.shown.length)s.shown=[allBibles()[0].id];saveSettings();delete S.bibles[e.id];IDB.del(e.id);
+    if(e.assetId&&S.assets){try{await S.assets.delete(e.assetId);}catch(err){}}renderAll();renderSettings();});
+  if($("#sySave"))$("#sySave").onclick=async()=>{const ok=await setToken($("#syTok").value);if(ok)renderSettings();};
+  if($("#syNow"))$("#syNow").onclick=async()=>{await syncNow();renderSettings();};
+  if($("#syClear"))$("#syClear").onclick=async()=>{if(!await ask("取消這台裝置的同步？（資料還會留在這台裝置）","取消同步",true))return;clearToken();renderSettings();};
+  $("#dlAll").onclick=()=>downloadAll($("#dlAll"),$("#dlProg"));
+  $("#oldImp").onclick=()=>importOld($("#oldData").value);
+  $("#expNotes").onclick=()=>{const arr=[...S.notes.values()].sort((a,b)=>(a.created||0)-(b.created||0));if(!arr.length){toast("還沒有筆記");return;}copyText(arr.map(n=>`【${fmtDate(n.created||n.updated)}】\n`+noteAsText(n)).join("\n\n==========\n\n"));};
+}
+
+/* ================= 匯入流程 ================= */
+function startImport(){$("#fileIn").value="";$("#fileIn").click();}
+$("#fileIn").onchange=async()=>{
+  const f=$("#fileIn").files[0]; if(!f)return;
+  modal(`<h3>讀取檔案中…</h3><p class="muted">${esc(f.name)}</p>`);
+  let text; try{text=await f.text();}catch(e){modal(`<h3>讀不到這個檔案</h3><div class="acts"><button class="btn" onclick="closeModal()">好</button></div>`);return;}
+  await new Promise(r=>setTimeout(r,30));
+  const res=normalizeBible(text);
+  if(res.count<500){modal(`<h3>看不懂這個檔案</h3><p class="hint">只讀到 ${res.count} 節經文。請確認下載的是聖經 JSON 檔（例如 cuv.json、kjv.json），而不是網頁。</p><div class="acts"><button class="btn" onclick="closeModal()">好</button></div>`);return;}
+  const base=f.name.replace(/\.[^.]+$/,"");
+  const guessName=res.meta.name||(/cuv/i.test(base)?"和合本":/kjv/i.test(base)?"King James Version":base);
+  const guessShort=(/cuv/i.test(base)?"和合本":"")||res.meta.short||(/kjv/i.test(base)?"KJV":base).toString().slice(0,10);
+  const sample=(res.data.books[42][2]||[])[15]||"";
+  modal(`<h3>匯入譯本</h3><p class="hint">讀到 ${res.nBooks} 卷書、${res.count.toLocaleString()} 節經文。</p>
+   ${sample?`<div class="prev" style="cursor:default"><div class="ref">約翰福音 3:16</div><div class="tx">${esc(sample)}</div></div>`:""}
+   <label class="f">譯本名稱</label><input id="imName" value="${esc(guessName)}">
+   <label class="f">簡稱（顯示在上方按鈕）</label><input id="imShort" value="${esc(guessShort)}">
+   <label class="f">語言</label><select id="imLang"><option value="zh">中文</option><option value="en">英文</option><option value="other">其他</option></select>
+   ${S.assets?"":`<p class="hint" style="color:var(--danger)">目前無法上傳到雲端，這個譯本只會存在這台裝置。</p>`}
+   <div class="acts"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" id="imOk">匯入</button></div>`);
+  $("#imLang").value=res.data.lang==="en"?"en":res.data.lang==="zh"?"zh":(/^zh/i.test(res.data.lang)?"zh":/^en/i.test(res.data.lang)?"en":"other");
+  $("#imOk").onclick=async()=>{
+    const name=$("#imName").value.trim()||guessName, short=$("#imShort").value.trim()||name.slice(0,6), lang=$("#imLang").value;
+    res.data.lang=lang; res.data.name=name;
+    const json=JSON.stringify(res.data); const id="bib"+Date.now().toString(36);
+    $("#imOk").disabled=true; $("#imOk").textContent="上傳中…";
+    let assetId=null;
+    if(S.assets){try{const up=await S.assets.upload(new Blob([json],{type:"application/json"}),{type:"application/json"});assetId=up.id;}catch(e){toast("上傳雲端失敗，先存在這台裝置");}}
+    await IDB.put(id,json); S.bibles[id]=res.data;
+    const entry={id,name,short,lang,count:res.count,assetId};
+    const s=S.settings; s.bibles=[...s.bibles,entry];
+    // 中文放前面
+    if(s.shown.length<3) s.shown=allBibles().map(x=>x.id).filter(x=>s.shown.includes(x)||x===id);
+    saveSettings(); closeModal(); renderAll(); if(Panels.cur==="settings")renderSettings();
+    toast(`已匯入「${name}」`);
+  };
+};
+
+/* ================= 開始 ================= */
+initStore();
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").then(reg=>{
+    reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{if(w.state==="activated"&&navigator.serviceWorker.controller)toast("已更新到新版本，下次打開會套用",3500);});});
+    setInterval(()=>reg.update().catch(()=>{}),3600000);
+  }).catch(()=>{});
+}
+</script>
+</body>
+</html>
